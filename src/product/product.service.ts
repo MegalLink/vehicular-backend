@@ -6,10 +6,9 @@ import {
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Model, MongooseError, isValidObjectId } from 'mongoose';
+import { Model } from 'mongoose';
 import { Product } from './entities/product.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { json } from 'stream/consumers';
 
 @Injectable()
 export class ProductService {
@@ -29,49 +28,53 @@ export class ProductService {
   }
 
   findAll() {
-    return `This action returns all product`;
+    return this._pokemonModel.find().exec();
   }
 
   async findOne(searchParam: string) {
-    let product: Product | null;
+    try {
+      const product = await this._pokemonModel.findById(searchParam);
+      if (!product) {
+        throw new NotFoundException(`Product with id ${searchParam} not found`);
+      }
 
-    const searchKey = this._getSearchKeyFindOne(searchParam);
-
-    product = await this._pokemonModel.findOne(searchKey);
-
-    if (!product)
-      throw new NotFoundException(
-        `Product with name or id ${searchParam} not found`,
-      );
-
-    return product;
-  }
-
-  private _getSearchKeyFindOne(searchParam: string): object {
-    //TODO trim and to lowercase if needed
-    if (isValidObjectId(searchParam)) {
-      return { _id: searchParam };
+      return product;
+    } catch (error) {
+      throw new NotFoundException(`Product with id ${searchParam} not found`);
     }
-
-    return { name: searchParam };
   }
 
   async update(searchParam: string, updateProductDto: UpdateProductDto) {
-    const product = await this.findOne(searchParam);
-
     try {
-      await product.updateOne(updateProductDto, {
-        new: true,
-      });
+      const product = await this._pokemonModel.findByIdAndUpdate(
+        searchParam,
+        updateProductDto,
+        { new: true },
+      );
+      if (!product) {
+        throw new NotFoundException(`Product with id ${searchParam} not found`);
+      }
+      return product;
     } catch (error) {
       this._handleException(error);
     }
-
-    return { ...product, ...updateProductDto };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(searchParam: string) {
+    const search_key = { _id: searchParam };
+
+    try {
+      const deleted_item =
+        await this._pokemonModel.findByIdAndDelete(search_key);
+
+      if (!deleted_item) {
+        throw new NotFoundException(`Product with id ${searchParam} not found`);
+      }
+
+      return deleted_item;
+    } catch (error) {
+      this._handleException(error);
+    }
   }
 
   private _handleException(error: any) {
@@ -80,10 +83,7 @@ export class ProductService {
         `Product already exists in db ${JSON.stringify(error.keyValue)}`,
       );
     }
-
     console.error('Error create:', error);
-    throw new InternalServerErrorException(
-      `Cant create product - Check server logs`,
-    );
+    throw error;
   }
 }

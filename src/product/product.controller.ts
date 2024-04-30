@@ -30,7 +30,7 @@ export class ProductController {
     return this.productService.findOne(searchParam);
   }
 
-  @Patch(':id')
+  @Patch(':searchParam')
   update(
     @Param('searchParam') searchParam: string,
     @Body() updateProductDto: UpdateProductDto,
@@ -38,8 +38,8 @@ export class ProductController {
     return this.productService.update(searchParam, updateProductDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  @Delete(':searchParam')
+  remove(@Param('searchParam') searchParam: string) {
+    return this.productService.remove(searchParam);
   }
 }

@@ -3,10 +3,6 @@ import { Document } from 'mongoose';
 
 @Schema()
 export class Product extends Document {
-  @Prop({
-    unique: true,
-    index: true,
-  })
   @Prop({})
   name: string;
   @Prop({})
