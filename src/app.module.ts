@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { ProductModule } from './product/product.module';
+import { SparePartModule } from './spare_part/spare_part.module';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
@@ -10,7 +10,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       rootPath: join(__dirname, '..', 'public'),
     }),
     MongooseModule.forRoot('mongodb://localhost:27017/nest-vehicular'), //TODO:change with env vars
-    ProductModule,
+    SparePartModule,
   ],
   controllers: [],
   providers: [],

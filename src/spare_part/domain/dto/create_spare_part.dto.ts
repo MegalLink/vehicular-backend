@@ -1,6 +1,6 @@
 import { IsInt, IsPositive, IsString, Min, MinLength } from 'class-validator';
 
-export class CreateProductDto {
+export class CreateSparePartDto {
   @IsString()
   @MinLength(1)
   name: string;
@@ -9,7 +9,6 @@ export class CreateProductDto {
   @IsPositive()
   @Min(0)
   price: number;
-  //TODO: add validation here or in front it depends
   images: string[];
   @IsString()
   @MinLength(1)
