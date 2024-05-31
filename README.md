@@ -14,7 +14,11 @@ $  npm i -g @nestjs/cli
 $ npm i
 ```
 
-2. Up databse
+2. Clone **.env.template**
+
+3. Set env vars on **.env** file
+
+4. Up databse
 
 ```bash
 $ docker-compose up -d
