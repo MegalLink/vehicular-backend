@@ -63,13 +63,9 @@ export class SparePartRepository implements ISparePartRepository {
         updateSparePartDto,
         { new: true },
       );
-      if (!sparePart) {
-        throw new NotFoundException(
-          `Spare Part with id ${searchParam} not found`,
-        );
-      }
+      this._handleNotfound(sparePart);
 
-      return sparePart;
+      return sparePart!;
     } catch (error) {
       this._handleException(error);
     }
@@ -82,13 +78,9 @@ export class SparePartRepository implements ISparePartRepository {
       const deleted_item =
         await this._sparePartModel.findByIdAndDelete(search_key);
 
-      if (!deleted_item) {
-        throw new NotFoundException(
-          `Spare Part with id ${searchParam} not found`,
-        );
-      }
+      this._handleNotfound(deleted_item);
 
-      return deleted_item;
+      return deleted_item!;
     } catch (error) {
       this._handleException(error);
     }
@@ -102,5 +94,18 @@ export class SparePartRepository implements ISparePartRepository {
     }
     console.error('Error create:', error);
     throw error;
+  }
+
+  private _handleNotfound(
+    sparePart: SparePart | undefined | null,
+    searchParam?: string,
+  ) {
+    if (!sparePart) {
+      const message = searchParam
+        ? `Spare Part with id ${searchParam} not found`
+        : `Could not create spare part`;
+
+      throw new NotFoundException(message);
+    }
   }
 }

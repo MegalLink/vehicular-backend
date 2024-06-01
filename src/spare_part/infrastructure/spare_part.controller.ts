@@ -11,7 +11,7 @@ import { SparePartService } from '../application/spare_part.service';
 import { CreateSparePartDto } from '../domain/dto/create_spare_part.dto';
 import { UpdateSparePartDto } from '../domain/dto/update_spare_part.dto';
 
-@Controller('spare_part')
+@Controller('spare-part')
 export class SparePartController {
   constructor(private readonly sparePartService: SparePartService) {}
 

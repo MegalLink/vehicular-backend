@@ -22,14 +22,9 @@ export class SparePartService implements ISparePartService {
   async create(
     createSparePartDto: CreateSparePartDto,
   ): Promise<ResponseSparePartDto | undefined> {
-    try {
-      const sparePart =
-        await this.sparePartRepository.create(createSparePartDto);
+    const sparePart = await this.sparePartRepository.create(createSparePartDto);
 
-      return this.mapSparePartToResponse(sparePart);
-    } catch (error) {
-      this._handleException(error);
-    }
+    return this.mapSparePartToResponse(sparePart!);
   }
 
   async findAll(): Promise<ResponseSparePartDto[]> {
@@ -39,78 +34,61 @@ export class SparePartService implements ISparePartService {
   }
 
   async findOne(searchParam: string): Promise<ResponseSparePartDto> {
-    try {
-      const sparePart = await this.sparePartRepository.findOne(searchParam);
-      if (!sparePart) {
-        throw new NotFoundException(
-          `SparePart with id ${searchParam} not found`,
-        );
-      }
+    const sparePart = await this.sparePartRepository.findOne(searchParam);
 
-      return this.mapSparePartToResponse(sparePart);
-    } catch (error) {
-      throw new NotFoundException(`SparePart with id ${searchParam} not found`);
-    }
+    return this.mapSparePartToResponse(
+      this._sparePartValidateFound(sparePart, searchParam),
+    );
   }
 
   async update(
     searchParam: string,
     updateSparePartDto: UpdateSparePartDto,
   ): Promise<ResponseSparePartDto | undefined> {
-    try {
-      const sparePart = await this.sparePartRepository.update(
-        searchParam,
-        updateSparePartDto,
-      );
-      if (!sparePart) {
-        throw new NotFoundException(
-          `SparePart with id ${searchParam} not found`,
-        );
-      }
+    const sparePart = await this.sparePartRepository.update(
+      searchParam,
+      updateSparePartDto,
+    );
 
-      return this.mapSparePartToResponse(sparePart);
-    } catch (error) {
-      this._handleException(error);
-    }
+    return this.mapSparePartToResponse(
+      this._sparePartValidateFound(sparePart, searchParam),
+    );
   }
 
   async remove(searchParam: string): Promise<ResponseSparePartDto | undefined> {
-    try {
-      const deleted_item = await this.sparePartRepository.remove(searchParam);
+    const deleted_item = await this.sparePartRepository.remove(searchParam);
 
-      if (!deleted_item) {
-        throw new NotFoundException(
-          `SparePart with id ${searchParam} not found`,
-        );
-      }
-
-      return this.mapSparePartToResponse(deleted_item);
-    } catch (error) {
-      this._handleException(error);
-    }
+    return this.mapSparePartToResponse(
+      this._sparePartValidateFound(deleted_item, searchParam),
+    );
   }
 
-  private mapSparePartToResponse(
-    sparePart: SparePart | undefined,
-  ): ResponseSparePartDto {
+  private mapSparePartToResponse(sparePart: SparePart): ResponseSparePartDto {
     return {
-      _id: sparePart!._id,
-      name: sparePart!.name,
-      description: sparePart!.description,
-      price: sparePart!.price,
-      images: sparePart!.images,
-      category: sparePart!.category,
-      stock: sparePart!.stock,
+      _id: sparePart._id,
+      code: sparePart.code,
+      name: sparePart.name,
+      description: sparePart.description,
+      price: sparePart.price,
+      images: sparePart.images,
+      category: sparePart.category,
+      stock: sparePart.stock,
+      brand: sparePart.brand,
+      part_model: sparePart.part_model,
+      year: sparePart.year,
     };
   }
 
-  private _handleException(error: any) {
-    if (error.code === 11000) {
-      throw new BadRequestException(
-        `SparePart already exists in db ${JSON.stringify(error.keyValue)}`,
+  private _sparePartValidateFound(
+    sparePart: SparePart | undefined,
+    searchParam: string,
+  ): SparePart {
+    if (!sparePart) {
+      throw new NotFoundException(
+        `SparePart with id: ${searchParam} not found`,
       );
     }
-    console.error('Error create:', error);
-    throw error;
+
+    return sparePart;
   }
 }
