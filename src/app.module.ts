@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { EnvConfiguration } from './config/env.config';
 import { EnvValidationSchema } from './config/joi.schema.validation';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { EnvValidationSchema } from './config/joi.schema.validation';
     }),
     MongooseModule.forRoot(process.env.MONGODB!, { dbName: 'vehicularDB' }),
     SparePartModule,
+    FilesModule,
   ],
   controllers: [],
   providers: [],
