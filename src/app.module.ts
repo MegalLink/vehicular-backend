@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SparePartModule } from './spare_part/spare_part.module';
@@ -7,6 +7,9 @@ import { ConfigModule } from '@nestjs/config';
 import { EnvConfiguration } from './config/env.config';
 import { EnvValidationSchema } from './config/joi.schema.validation';
 import { FilesModule } from './files/files.module';
+import { BrandModule } from './brand/brand.module';
+import { CategoryModule } from './category/category.module';
+import { LoggerMiddleware } from './common/domain/repository/logger.middleware';
 
 @Module({
   imports: [
@@ -20,8 +23,14 @@ import { FilesModule } from './files/files.module';
     MongooseModule.forRoot(process.env.MONGODB!, { dbName: 'vehicularDB' }),
     SparePartModule,
     FilesModule,
+    BrandModule,
+    CategoryModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

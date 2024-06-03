@@ -16,7 +16,9 @@ export class FilesService implements IFilesService {
 
   async uploadImage(image: Express.Multer.File): Promise<ResponseFileDto> {
     if (!image) {
-      throw new BadRequestException('File not allowed , allowed image types:');
+      throw new BadRequestException(
+        'File not allowed , allowed image types: png,jpg,jpeg',
+      );
     }
     console.log({ image: image, path: image.path });
 

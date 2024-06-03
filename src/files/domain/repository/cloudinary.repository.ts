@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 } from 'cloudinary';
 import { EnvironmentConstants } from 'src/config/env.config';
 import { ResponseFileDto } from 'src/files/domain/dto/reponse_file.dto';
 import { IGeneriFileRepository } from './file.repository.interface';
-
+const fs = require('fs');
 @Injectable()
 export class CloudinaryRepository implements IGeneriFileRepository {
   constructor(private readonly _configService: ConfigService) {
@@ -29,8 +29,20 @@ export class CloudinaryRepository implements IGeneriFileRepository {
       .upload(filePath, {
         folder: `${environment}/images`,
       })
-      .then((result) => ({
-        fileUrl: result.url,
-      }));
+      .then((result) => {
+        return {
+          fileUrl: result.url,
+        };
+      })
+      .catch((err) => {
+        throw new InternalServerErrorException(err);
+      })
+      .finally(() => {
+        fs.unlink(filePath, (err: any) => {
+          if (err) {
+            console.error('Error deleting file:', err);
+          }
+        });
+      });
   }
 }

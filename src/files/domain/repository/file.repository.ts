@@ -14,7 +14,6 @@ export class FileRepository implements IGeneriFileRepository {
     const environment = this._configService.get(
       EnvironmentConstants.environment,
     );
-    console.log('Environment', environment);
 
     if (environment === 'dev') {
       this._repository = new LocalFilesRepository(this._configService);
