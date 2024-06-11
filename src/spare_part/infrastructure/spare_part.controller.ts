@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { SparePartService } from '../application/spare_part.service';
 import { CreateSparePartDto } from '../domain/dto/create_spare_part.dto';
 import { UpdateSparePartDto } from '../domain/dto/update_spare_part.dto';
+import { QuerySparePartDto } from '../domain/dto/query_spare_part.dto';
 
 @Controller('spare-part')
 export class SparePartController {
@@ -21,8 +23,8 @@ export class SparePartController {
   }
 
   @Get()
-  findAll() {
-    return this.sparePartService.findAll();
+  async findAll(@Query() queryDto: QuerySparePartDto) {
+    return this.sparePartService.findAll(queryDto);
   }
 
   @Get(':searchParam')

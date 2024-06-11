@@ -6,7 +6,7 @@ import {
   SparePart,
   SparePartSchema,
 } from './domain/entities/spare_part.entity';
-import { SparePartRepository } from './domain/repository/spare_part_db';
+import { SparePartRepository } from './domain/repository/spare_part.repository';
 
 @Module({
   controllers: [SparePartController],
