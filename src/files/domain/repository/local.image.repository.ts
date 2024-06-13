@@ -6,9 +6,7 @@ import { EnvironmentConstants } from 'src/config/env.config';
 
 @Injectable()
 export class LocalFilesRepository implements IGeneriFileRepository {
-  constructor(private readonly _configService: ConfigService) {
-    console.log('Local File repository');
-  }
+  constructor(private readonly _configService: ConfigService) {}
 
   async uploadImage(filePath: string): Promise<ResponseFileDto> {
     const port = this._configService.get(EnvironmentConstants.port);

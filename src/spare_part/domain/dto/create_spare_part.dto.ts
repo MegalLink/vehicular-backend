@@ -32,8 +32,14 @@ export class CreateSparePartDto {
   brand: string;
   @IsOptional()
   @IsString()
-  part_model: string;
+  brandModel: string;
   @IsOptional()
   @IsString()
-  year: string;
+  modelType: string;
+  @IsOptional()
+  @IsString()
+  modelTypeYear: string;
+  @IsOptional()
+  @IsString()
+  userID: string;
 }

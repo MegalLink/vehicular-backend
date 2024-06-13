@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SparePartModule } from './spare_part/spare_part.module';
@@ -10,6 +15,8 @@ import { FilesModule } from './files/files.module';
 import { BrandModule } from './brand/brand.module';
 import { CategoryModule } from './category/category.module';
 import { LoggerMiddleware } from './common/domain/repository/logger.middleware';
+import { AuthModule } from './auth/auth.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -25,12 +32,20 @@ import { LoggerMiddleware } from './common/domain/repository/logger.middleware';
     FilesModule,
     BrandModule,
     CategoryModule,
+    AuthModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer
+      .apply(LoggerMiddleware)
+      .exclude(
+        { path: 'auth', method: RequestMethod.ALL }, // Excluye todas las rutas bajo 'auth'
+        { path: 'auth/(.*)', method: RequestMethod.ALL }, // Excluye todas las subrutas de 'auth'
+      )
+      .forRoutes('*');
   }
 }

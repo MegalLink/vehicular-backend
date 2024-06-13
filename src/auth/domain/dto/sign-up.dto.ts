@@ -1,0 +1,32 @@
+import {
+  IsEmail,
+  IsLowercase,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+
+export class SignUpUserDto {
+  @IsEmail({}, { message: 'El correo electrónico no es válido' })
+  @IsString({ message: 'El correo electrónico debe ser una cadena de texto' })
+  @IsLowercase({ message: 'El correo electrónico debe estar en minúsculas' })
+  email: string;
+
+  @IsString({ message: 'La contraseña debe ser una cadena de texto' })
+  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
+  @MaxLength(50, {
+    message: 'La contraseña debe tener como máximo 50 caracteres',
+  })
+  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message:
+      'La contraseña debe tener al menos una letra mayúscula, una letra minúscula y un número',
+  })
+  password: string;
+
+  @IsString({ message: 'El nombre de usuario debe ser una cadena de texto' })
+  @MinLength(1, {
+    message: 'El nombre de usuario debe tener al menos 1 carácter',
+  })
+  userName: string;
+}

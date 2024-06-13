@@ -58,7 +58,7 @@ export abstract class BaseRepository<T extends Document, R> {
       const entity = await this._model
         .findByIdAndUpdate(searchParam, updateDto, { new: true })
         .exec();
-      console.log('Entity response', entity);
+
       this._handleNotfound(entity, searchParam);
       return this.transform(entity!);
     } catch (error) {
@@ -83,7 +83,6 @@ export abstract class BaseRepository<T extends Document, R> {
   }
 
   private _handleException(error: any) {
-    console.error('_handleException Error', error);
     if (error instanceof NotFoundException)
       throw new NotFoundException(error.message);
 
@@ -101,7 +100,6 @@ export abstract class BaseRepository<T extends Document, R> {
     entity: T | undefined | null,
     searchParam?: string | object,
   ) {
-    console.log('handle not found', entity);
     if (!entity) {
       const message = searchParam
         ? `${this.entityName} with ${JSON.stringify(searchParam)} not found`

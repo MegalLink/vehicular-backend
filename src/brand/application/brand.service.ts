@@ -6,27 +6,64 @@ import { IBrandRepository } from '../domain/repository/brand.repository.interfac
 import { BrandRepository } from '../domain/repository/brand.repository';
 import { ResponseBrandDto } from '../domain/dto/response-brand.dto';
 import { isValidObjectId } from 'mongoose';
+import { CreateBrandModelDto } from '../domain/dto/create-brand-model.dto';
+import { CreateModelTypeDto } from '../domain/dto/create-model-type.dto';
+import { ResponseBrandModelDto } from '../domain/dto/response-brand-model.dto';
+import { ResponseModelTypeDto } from '../domain/dto/response-model-type.dto';
+import { BrandModelRepository } from '../domain/repository/brand-model.repository';
+import { IBrandModelRepository } from '../domain/repository/brand-model.repository.interface';
+import { IModelTypeRepository } from '../domain/repository/model-type.repository.interface';
+import { ModelTypeRepository } from '../domain/repository/model-type.repository';
 
 @Injectable()
 export class BrandService implements IBrandService {
   constructor(
     @Inject(BrandRepository)
     private readonly brandRepository: IBrandRepository,
+    @Inject(BrandModelRepository)
+    private readonly modelRepository: IBrandModelRepository,
+    @Inject(ModelTypeRepository)
+    private readonly typeRepository: IModelTypeRepository,
   ) {}
 
-  async create(createBrandDto: CreateBrandDto): Promise<ResponseBrandDto> {
-    const Brand = await this.brandRepository.create(createBrandDto);
+  createBrandModel(
+    createDto: CreateBrandModelDto,
+  ): Promise<ResponseBrandModelDto> {
+    return this.modelRepository.create(createDto);
+  }
+  createBrandType(
+    createDto: CreateModelTypeDto,
+  ): Promise<ResponseModelTypeDto> {
+    return this.typeRepository.create(createDto);
+  }
+  findAllBrandModels(brand: string): Promise<ResponseBrandModelDto[]> {
+    const query: Record<string, any> = {};
 
-    return Brand;
+    if (brand) {
+      query.brandName = brand;
+    }
+
+    return this.modelRepository.findAll(query);
+  }
+  findAllModelTypes(model: string): Promise<ResponseModelTypeDto[]> {
+    const query: Record<string, any> = {};
+
+    if (model) {
+      query.brandModel = model;
+    }
+
+    return this.typeRepository.findAll(query);
   }
 
-  async findAll(): Promise<ResponseBrandDto[]> {
-    const response = await this.brandRepository.findAll();
-
-    return response;
+  async createBrand(createBrandDto: CreateBrandDto): Promise<ResponseBrandDto> {
+    return await this.brandRepository.create(createBrandDto);
   }
 
-  async findOne(searchParam: string): Promise<ResponseBrandDto> {
+  async findAllBrands(): Promise<ResponseBrandDto[]> {
+    return await this.brandRepository.findAll();
+  }
+
+  async findOneBrand(searchParam: string): Promise<ResponseBrandDto> {
     if (isValidObjectId(searchParam)) {
       return await this.brandRepository.findOne({ _id: searchParam });
     }
@@ -34,21 +71,14 @@ export class BrandService implements IBrandService {
     return await this.brandRepository.findOne({ name: searchParam });
   }
 
-  async update(
+  async updateBrand(
     searchParam: string,
     updateBrandDto: UpdateBrandDto,
   ): Promise<ResponseBrandDto> {
-    const Brand = await this.brandRepository.update(
-      searchParam,
-      updateBrandDto,
-    );
-
-    return Brand;
+    return await this.brandRepository.update(searchParam, updateBrandDto);
   }
 
-  async remove(searchParam: string): Promise<ResponseBrandDto> {
-    const deleted_item = await this.brandRepository.remove(searchParam);
-
-    return deleted_item;
+  async removeBrand(searchParam: string): Promise<ResponseBrandDto> {
+    return await this.brandRepository.remove(searchParam);
   }
 }

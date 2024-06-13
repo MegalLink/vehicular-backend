@@ -20,7 +20,6 @@ export class FilesService implements IFilesService {
         'File not allowed , allowed image types: png,jpg,jpeg',
       );
     }
-    console.log({ image: image, path: image.path });
 
     return this._fileRepository.uploadImage(image.path);
   }
