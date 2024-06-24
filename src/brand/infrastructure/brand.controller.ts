@@ -18,7 +18,7 @@ export class BrandController {
     return this.brandService.createBrandModel(createDto);
   }
 
-  @Post('model')
+  @Post('model/type')
   createBrandModelType(@Body() createDto: CreateModelTypeDto) {
     return this.brandService.createBrandType(createDto);
   }
@@ -28,14 +28,14 @@ export class BrandController {
     return this.brandService.findAllBrands();
   }
 
-  @Get('model/:model')
-  findAllBrandModels(@Param('model') model: string) {
-    return this.brandService.findAllBrandModels(model);
+  @Get(':brand/model')
+  findAllBrandModels(@Param('brand') brand: string) {
+    return this.brandService.findAllBrandModels(brand);
   }
 
-  @Get('model/type/:modelType')
-  findAllModelTypes(@Param('modelType') modelType: string) {
-    return this.brandService.findAllModelTypes(modelType);
+  @Get('model/:model/type')
+  findAllModelTypes(@Param('model') model: string) {
+    return this.brandService.findAllModelTypes(model);
   }
 
   @Get(':id')

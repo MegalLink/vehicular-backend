@@ -8,11 +8,11 @@ import {
 } from 'class-validator';
 import { ValidRoles } from '../../decorators/role-protect.decorator';
 
-export class ResponseUserDto {
+export class UpdateUserRequestDto {
   @IsArray({ message: 'Los roles deben ser un array' })
   @ArrayNotEmpty({ message: 'El array de roles no puede estar vacío' })
   @IsString({ each: true, message: 'Cada rol debe ser una cadena de texto' })
-  @IsIn([Object.values(ValidRoles)], {
+  @IsIn(Object.values(ValidRoles), {
     each: true,
     message: `Cada rol debe ser uno de los siguientes valores: ${Object.values(ValidRoles)}`,
   })
@@ -22,4 +22,4 @@ export class ResponseUserDto {
   isActive: boolean;
 }
 
-export class UpdateUserDto extends PartialType(ResponseUserDto) {}
+export class UpdateUserDto extends PartialType(UpdateUserRequestDto) {}

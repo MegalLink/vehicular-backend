@@ -30,7 +30,7 @@ export class UserRoleGuard implements CanActivate {
     const user: ResponseUserDbDto = req.user;
 
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException('Usuario no encontrado');
     }
 
     for (const role of user.roles) {
@@ -39,7 +39,7 @@ export class UserRoleGuard implements CanActivate {
       }
     }
     throw new ForbiddenException(
-      `User ${user.userName} is not authorized to use this endpoint`,
+      `El usuario ${user.userName} no esta autorizado a usar este endpoint`,
     );
   }
 }

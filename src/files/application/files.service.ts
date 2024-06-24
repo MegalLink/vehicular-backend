@@ -1,5 +1,4 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { CloudinaryRepository } from '../domain/repository/cloudinary.repository';
 import { IGeneriFileRepository } from '../domain/repository/file.repository.interface';
 import { ResponseFileDto } from 'src/files/domain/dto/reponse_file.dto';
 import { FileRepository } from '../domain/repository/file.repository';
@@ -17,7 +16,7 @@ export class FilesService implements IFilesService {
   async uploadImage(image: Express.Multer.File): Promise<ResponseFileDto> {
     if (!image) {
       throw new BadRequestException(
-        'File not allowed , allowed image types: png,jpg,jpeg',
+        'Tipo de archivo de imagen no permitido , tipos de archivo de imagen permitidos: png,jpg,jpeg',
       );
     }
 
@@ -29,7 +28,7 @@ export class FilesService implements IFilesService {
 
     if (!existsSync(path)) {
       throw new BadRequestException(
-        `No image file found with name ${imageName}`,
+        `No se encontra la imagen con nombre ${imageName}`,
       );
     }
 

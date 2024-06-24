@@ -14,7 +14,7 @@ export class SparePartRepository extends BaseRepository<
     @InjectModel(SparePart.name)
     private readonly _sparePartModel: Model<SparePart>,
   ) {
-    super(_sparePartModel, 'Spare part');
+    super(_sparePartModel, 'Repuesto');
   }
 
   transform(entity: SparePart): ResponseSparePartDto {

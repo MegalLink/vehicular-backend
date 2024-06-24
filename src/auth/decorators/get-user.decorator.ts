@@ -10,7 +10,7 @@ export const GetUser = createParamDecorator(
     const req = ctx.switchToHttp().getRequest();
     const user: ResponseUserDbDto = req.user;
 
-    if (!user) throw new InternalServerErrorException('User not found');
+    if (!user) throw new InternalServerErrorException('Usuario no encontrado');
 
     return user;
   },

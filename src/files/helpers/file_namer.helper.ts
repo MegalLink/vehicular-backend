@@ -5,7 +5,7 @@ export const fileNamer = (
   file: Express.Multer.File,
   callback: (error: Error | null, acceptFile: string) => void,
 ) => {
-  if (!file) return callback(new Error('File is empty'), '');
+  if (!file) return callback(new Error('El archivo esta vacio'), '');
 
   const fileExtension = file.mimetype.split('/')[1];
 

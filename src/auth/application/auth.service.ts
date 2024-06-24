@@ -60,7 +60,7 @@ export class AuthService {
       };
     } catch (error) {
       if (error instanceof NotFoundException)
-        throw new UnauthorizedException('Credentials not valid');
+        throw new UnauthorizedException('Credenciales no validas');
       if (error instanceof BadRequestException) {
         const user = await this._userRepository.findOne({
           email: signUpDto.email,

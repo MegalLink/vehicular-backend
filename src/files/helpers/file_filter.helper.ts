@@ -3,7 +3,7 @@ export const fileFilter = (
   file: Express.Multer.File,
   callback: (error: Error | null, acceptFile: boolean) => void,
 ) => {
-  if (!file) return callback(new Error('File is empty'), false);
+  if (!file) return callback(new Error('El archivo esta vacio'), false);
 
   const fileExtension = file.mimetype.split('/')[1];
   const allowedExtensions = ['jpeg', 'png', 'jpg'];

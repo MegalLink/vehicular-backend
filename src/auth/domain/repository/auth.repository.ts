@@ -15,7 +15,7 @@ export class UserRepository
     @InjectModel(User.name)
     private readonly _userModel: Model<User>,
   ) {
-    super(_userModel, 'User');
+    super(_userModel, 'Usuario');
   }
 
   transform(entity: User): ResponseUserDbDto {
