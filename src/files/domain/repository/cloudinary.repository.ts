@@ -4,11 +4,11 @@ import { v2 } from 'cloudinary';
 import { EnvironmentConstants } from 'src/config/env.config';
 import { ResponseFileDto } from 'src/files/domain/dto/reponse_file.dto';
 import { IGeneriFileRepository } from './file.repository.interface';
-const fs = require('fs');
+import fs from 'fs';
+
 @Injectable()
 export class CloudinaryRepository implements IGeneriFileRepository {
   constructor(private readonly _configService: ConfigService) {
-    console.log('Cloudinary repository');
     v2.config({
       cloud_name: this._configService.get(
         EnvironmentConstants.cloudinary_cloud_name,

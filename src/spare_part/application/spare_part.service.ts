@@ -7,6 +7,7 @@ import { ISparePartRepository } from '../domain/repository/spare_part.respositor
 import { ResponseSparePartDto } from '../domain/dto/response_spare_part.dto';
 import { isValidObjectId } from 'mongoose';
 import { QuerySparePartDto } from '../domain/dto/query_spare_part.dto';
+import { ResponseUserDbDto } from 'src/auth/domain/dto/response-user-db.dto';
 
 @Injectable()
 export class SparePartService implements ISparePartService {
@@ -17,10 +18,14 @@ export class SparePartService implements ISparePartService {
 
   async create(
     createSparePartDto: CreateSparePartDto,
+    user: ResponseUserDbDto,
   ): Promise<ResponseSparePartDto> {
-    const sparePart = await this.sparePartRepository.create(createSparePartDto);
-
-    return sparePart;
+    const createSparePart = {
+      ...createSparePartDto,
+      user_id: user._id,
+      createdBy: user.userName,
+    };
+    return await this.sparePartRepository.create(createSparePart);
   }
 
   async findAll(queryDto: QuerySparePartDto): Promise<ResponseSparePartDto[]> {
@@ -46,11 +51,15 @@ export class SparePartService implements ISparePartService {
     if (filters.maxPrice !== undefined) {
       query.price = { ...query.price, $lte: filters.maxPrice };
     }
-    if (filters.partModel) {
-      query.part_model = filters.partModel;
+    if (filters.brandModel) {
+      query.part_model = filters.brandModel;
     }
-    if (filters.year) {
-      query.year = filters.year;
+
+    if (filters.modelType) {
+      query.part_model = filters.modelType;
+    }
+    if (filters.modelTypeYear) {
+      query.year = filters.modelTypeYear;
     }
 
     return query;
@@ -67,17 +76,13 @@ export class SparePartService implements ISparePartService {
     searchParam: string,
     updateSparePartDto: UpdateSparePartDto,
   ): Promise<ResponseSparePartDto> {
-    const sparePart = await this.sparePartRepository.update(
+    return await this.sparePartRepository.update(
       searchParam,
       updateSparePartDto,
     );
-
-    return sparePart;
   }
 
   async remove(searchParam: string): Promise<ResponseSparePartDto> {
-    const deleted_item = await this.sparePartRepository.remove(searchParam);
-
-    return deleted_item;
+    return await this.sparePartRepository.remove(searchParam);
   }
 }

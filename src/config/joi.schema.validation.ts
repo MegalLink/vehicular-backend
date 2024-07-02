@@ -6,4 +6,12 @@ export const EnvValidationSchema = joi.object({
   CLOUDINARY_CLOUD_NAME: joi.required(),
   CLOUDINARY_API_KEY: joi.required(),
   CLOUDINARY_API_SECRET: joi.required(),
+  JWT_SECRET: joi.required(),
+  JWT_EXPIRES_IN: joi.required(),
+  EMAIL_HOST: joi.required(),
+  EMAIL_PORT: joi.required(),
+  EMAIL_USER: joi.required(),
+  EMAIL_PASS: joi.required(),
+  EMAIL_FROM: joi.required(),
+  REST_API_URL: joi.required(),
 });

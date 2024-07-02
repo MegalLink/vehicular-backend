@@ -5,6 +5,14 @@ export const EnvConfiguration = () => ({
   cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
   cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
+  jwt_secret: process.env.JWT_SECRET,
+  jwt_expires_in: process.env.JWT_EXPIRES_IN,
+  email_host: process.env.EMAIL_HOST,
+  email_port: process.env.EMAIL_PORT,
+  email_user: process.env.EMAIL_USER,
+  email_pass: process.env.EMAIL_PASS,
+  email_from: process.env.EMAIL_FROM,
+  rest_api_url: process.env.REST_API_URL,
 });
 
 export enum EnvironmentConstants {
@@ -14,4 +22,12 @@ export enum EnvironmentConstants {
   cloudinary_cloud_name = 'cloudinary_cloud_name',
   cloudinary_api_key = 'cloudinary_api_key',
   cloudinary_api_secret = 'cloudinary_api_secret',
+  jwt_secret = 'jwt_secret',
+  jwt_expires_in = 'jwt_expires_in',
+  email_host = 'email_host',
+  email_port = 'email_port',
+  email_user = 'email_user',
+  email_pass = 'email_pass',
+  email_from = 'email_from',
+  rest_api_url = 'rest_api_url',
 }

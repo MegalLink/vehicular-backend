@@ -23,7 +23,7 @@ export abstract class BaseRepository<T extends Document, R> {
     } catch (error) {
       this._handleException(error);
     }
-    throw new BadRequestException('An unexpected error occurred');
+    throw new BadRequestException('A ocurrido un error inesperado');
   }
 
   async findAll(query: object = {}): Promise<R[]> {
@@ -33,7 +33,7 @@ export abstract class BaseRepository<T extends Document, R> {
     } catch (error) {
       this._handleException(error);
     }
-    throw new BadRequestException('An unexpected error occurred');
+    throw new BadRequestException('A ocurrido un error inesperado');
   }
 
   async findOne(searchParam: object): Promise<R> {
@@ -41,7 +41,7 @@ export abstract class BaseRepository<T extends Document, R> {
       const entity = await this._model.findOne(searchParam).exec();
       if (!entity) {
         throw new NotFoundException(
-          `${this.entityName} with id ${searchParam} not found`,
+          `${this.entityName} con id ${searchParam} no encontrado`,
         );
       }
       return this.transform(entity);
@@ -49,7 +49,7 @@ export abstract class BaseRepository<T extends Document, R> {
       this._handleNotfound(undefined, searchParam);
     }
     throw new NotFoundException(
-      `${this.entityName} with id ${searchParam} not found`,
+      `${this.entityName} con id ${searchParam} no encontrado`,
     );
   }
 
@@ -58,14 +58,14 @@ export abstract class BaseRepository<T extends Document, R> {
       const entity = await this._model
         .findByIdAndUpdate(searchParam, updateDto, { new: true })
         .exec();
-      console.log('Entity response', entity);
+
       this._handleNotfound(entity, searchParam);
       return this.transform(entity!);
     } catch (error) {
       this._handleException(error);
     }
     throw new NotFoundException(
-      `${this.entityName} with id ${searchParam} not found`,
+      `${this.entityName} con id ${searchParam} no encontrado`,
     );
   }
 
@@ -78,34 +78,32 @@ export abstract class BaseRepository<T extends Document, R> {
       this._handleException(error);
     }
     throw new NotFoundException(
-      `${this.entityName} with id ${searchParam} not found`,
+      `${this.entityName} con id ${searchParam} no encontrado`,
     );
   }
 
   private _handleException(error: any) {
-    console.error('_handleException Error', error);
     if (error instanceof NotFoundException)
       throw new NotFoundException(error.message);
 
     if (error.code === 11000) {
       throw new BadRequestException(
-        `${this.entityName} already exists in db ${JSON.stringify(error.keyValue)}`,
+        `${this.entityName} ya existe en la base de datos ${JSON.stringify(error.keyValue)}`,
       );
     }
 
     console.error('Error:', error);
-    throw new BadRequestException('An unexpected error occurred');
+    throw new BadRequestException('A ocurrido un error inesperado');
   }
 
   private _handleNotfound(
     entity: T | undefined | null,
     searchParam?: string | object,
   ) {
-    console.log('handle not found', entity);
     if (!entity) {
       const message = searchParam
-        ? `${this.entityName} with ${JSON.stringify(searchParam)} not found`
-        : `Could not create ${this.entityName}`;
+        ? `${this.entityName} con ${JSON.stringify(searchParam)} no encontrado`
+        : `No se puedo crear ${this.entityName}`;
       throw new NotFoundException(message);
     }
   }

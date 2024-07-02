@@ -7,6 +7,7 @@ import {
   SparePartSchema,
 } from './domain/entities/spare_part.entity';
 import { SparePartRepository } from './domain/repository/spare_part.repository';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   controllers: [SparePartController],
@@ -15,6 +16,7 @@ import { SparePartRepository } from './domain/repository/spare_part.repository';
     MongooseModule.forFeature([
       { name: SparePart.name, schema: SparePartSchema },
     ]),
+    AuthModule,
   ],
 })
 export class SparePartModule {}

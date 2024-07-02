@@ -13,16 +13,15 @@ export class BrandRepository
 {
   constructor(
     @InjectModel(Brand.name)
-    private readonly BrandModel: Model<Brand>,
+    private readonly Brand: Model<Brand>,
   ) {
-    super(BrandModel, 'Spare part');
+    super(Brand, 'Brand');
   }
 
   transform(entity: Brand): ResponseBrandDto {
     return {
       _id: entity._id,
       name: entity.name,
-      models: entity.models,
       image: entity.image,
     };
   }

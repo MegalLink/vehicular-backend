@@ -8,8 +8,6 @@ export class Brand extends Document {
   })
   name: string;
   @Prop({})
-  models: string[];
-  @Prop({})
   image: string;
 }
 

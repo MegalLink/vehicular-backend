@@ -14,12 +14,7 @@ export class SparePartRepository extends BaseRepository<
     @InjectModel(SparePart.name)
     private readonly _sparePartModel: Model<SparePart>,
   ) {
-    super(_sparePartModel, 'Spare part');
-  }
-
-  async findAll(filters: any): Promise<ResponseSparePartDto[]> {
-    const entities = await this._sparePartModel.find(filters).exec();
-    return entities.map((entity) => this.transform(entity));
+    super(_sparePartModel, 'Repuesto');
   }
 
   transform(entity: SparePart): ResponseSparePartDto {
@@ -33,8 +28,13 @@ export class SparePartRepository extends BaseRepository<
       category: entity.category,
       stock: entity.stock,
       brand: entity.brand,
-      part_model: entity.part_model,
-      year: entity.year,
+      brandModel: entity.brandModel,
+      modelType: entity.modelType,
+      modelTypeYear: entity.modelTypeYear,
+      userID: entity.userID,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      createdBy: entity.createdBy,
     };
   }
 }

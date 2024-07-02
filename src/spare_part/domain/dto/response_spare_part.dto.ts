@@ -8,6 +8,11 @@ export class ResponseSparePartDto {
   category: string;
   stock: number;
   brand: string;
-  part_model: string;
-  year: string;
+  brandModel: string;
+  modelType: string;
+  modelTypeYear: string;
+  userID: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

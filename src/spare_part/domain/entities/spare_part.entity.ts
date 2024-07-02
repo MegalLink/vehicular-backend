@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class SparePart extends Document {
   @Prop({
     unique: true,
@@ -23,9 +23,19 @@ export class SparePart extends Document {
   @Prop({})
   brand: string;
   @Prop({})
-  part_model: string;
+  brandModel: string;
   @Prop({})
-  year: string;
+  modelType: string;
+  @Prop({})
+  modelTypeYear: string;
+  @Prop({})
+  userID: string;
+  @Prop({})
+  createdBy: string;
+  @Prop({})
+  createdAt: Date;
+  @Prop({})
+  updatedAt: Date;
 }
 
 export const SparePartSchema = SchemaFactory.createForClass(SparePart);
