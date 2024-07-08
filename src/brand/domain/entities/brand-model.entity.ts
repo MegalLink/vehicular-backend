@@ -9,8 +9,6 @@ export class BrandModel extends Document {
   name: string;
   @Prop({})
   brandName: string;
-  @Prop({})
-  image: string;
 }
 
 export const BrandModelSchema = SchemaFactory.createForClass(BrandModel);

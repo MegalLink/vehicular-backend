@@ -29,16 +29,34 @@ export class BrandService implements IBrandService {
   async createBrandModel(
     createDto: CreateBrandModelDto,
   ): Promise<ResponseBrandModelDto> {
-    await this.brandRepository.findOne({ name: createDto.brandName });
+    const brand = await this.brandRepository.findOne({
+      name: createDto.brandName,
+    });
+    if (!brand) {
+      throw new NotFoundException(`Marca ${createDto.brandName} no encontrada`);
+    }
 
-    return this.modelRepository.create(createDto);
+    return this.modelRepository.create({
+      name: `${brand.name} ${createDto.name}`,
+      brandName: brand.name,
+    });
   }
   async createBrandType(
     createDto: CreateModelTypeDto,
   ): Promise<ResponseModelTypeDto> {
-    await this.modelRepository.findOne({ name: createDto.modelName });
+    const model = await this.modelRepository.findOne({
+      name: createDto.modelName,
+    });
+    if (!model) {
+      throw new NotFoundException(
+        `Modelo ${createDto.modelName} no encontrado`,
+      );
+    }
 
-    return this.typeRepository.create(createDto);
+    return this.typeRepository.create({
+      name: `${createDto.name}`,
+      modelName: model.name,
+    });
   }
   findAllBrandModels(brandName: string): Promise<ResponseBrandModelDto[]> {
     const query: Record<string, any> = {};

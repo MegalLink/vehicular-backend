@@ -23,7 +23,6 @@ export class BrandModelRepository
       _id: entity._id as string,
       name: entity.name,
       brandName: entity.brandName,
-      image: entity.image,
     };
   }
 }
