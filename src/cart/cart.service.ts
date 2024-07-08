@@ -1,26 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { ResponseUserDbDto } from '../auth/domain/dto/response-user-db.dto';
+import { isValidObjectId } from 'mongoose';
+import { CartRepository } from './repository/cart.repository';
+import { ICartRepository } from './repository/cart.respository.interface';
+import { ResponseCartDbDto } from './dto/response-cart-db.dto';
 
 @Injectable()
 export class CartService {
-  create(createCartDto: CreateCartDto) {
-    return 'This action adds a new cart';
+  constructor(
+    @Inject(CartRepository)
+    private readonly userDetailRepository: ICartRepository,
+  ) {}
+  async create(
+    createDto: CreateCartDto,
+    user: ResponseUserDbDto,
+  ): Promise<ResponseCartDbDto> {
+    const createCart = {
+      ...createDto,
+      userID: user._id,
+    };
+    return await this.userDetailRepository.create(createCart);
   }
 
-  findAll() {
-    return `This action returns all cart`;
+  async findAll(): Promise<ResponseCartDbDto[]> {
+    return await this.userDetailRepository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cart`;
+  async findOne(searchParam: string): Promise<ResponseCartDbDto> {
+    const query: object = isValidObjectId(searchParam)
+      ? { _id: searchParam }
+      : { name: searchParam };
+    const response = await this.userDetailRepository.findOne(query);
+
+    if (!response) {
+      throw new NotFoundException(
+        `Detall de usuario con ${query} no encontrado`,
+      );
+    }
+
+    return response;
   }
 
-  update(id: number, updateCartDto: UpdateCartDto) {
-    return `This action updates a #${id} cart`;
+  async update(
+    searchParam: string,
+    updateCategoryDto: UpdateCartDto,
+  ): Promise<ResponseCartDbDto> {
+    return await this.userDetailRepository.update(
+      searchParam,
+      updateCategoryDto,
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cart`;
+  async remove(searchParam: string): Promise<ResponseCartDbDto> {
+    return await this.userDetailRepository.remove(searchParam);
   }
 }

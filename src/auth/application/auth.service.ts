@@ -43,7 +43,11 @@ export class AuthService {
   ) {}
 
   async signUp(signUpDto: SignUpUserDto): Promise<object> {
-    const token: string = this._getJWT({ email: signUpDto.email });
+    const token: string = this._getJWT({
+      email: signUpDto.email,
+      userName: signUpDto.userName,
+      roles: [ValidRoles.user], // Default role on register
+    });
     try {
       const { password, ...userData } = signUpDto;
 
@@ -198,7 +202,11 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales no validas');
     }
 
-    user.confirmationToken = this._getJWT({ email: email });
+    user.confirmationToken = this._getJWT({
+      email: email,
+      userName: user.userName,
+      roles: user.roles,
+    });
     await this._userRepository.update(user._id, user);
 
     await this._emailRepository.sendEmail(
@@ -239,7 +247,7 @@ export class AuthService {
     const new_user = {
       email: user.email,
       roles: [ValidRoles.user],
-      username: user.displayName,
+      userName: user.displayName,
       isEmailConfirmed: true,
       isActive: true,
     };
@@ -252,7 +260,11 @@ export class AuthService {
     return {
       email: user.email,
       roles: user.roles,
-      token: this._getJWT({ email: user.email }),
+      token: this._getJWT({
+        email: user.email,
+        userName: user.userName,
+        roles: user.roles,
+      }),
       _id: user._id,
     };
   }

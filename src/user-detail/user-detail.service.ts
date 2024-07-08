@@ -1,26 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDetailDto } from './dto/create-user-detail.dto';
+import { UserDetailRepository } from './repository/user-detail.repository';
+import { IUserDetailRepository } from './repository/user-detail.respository.interface';
+import { isValidObjectId } from 'mongoose';
+import { ResponseUserDetailDbDto } from './dto/response-user-detail-response-db.dto';
 import { UpdateUserDetailDto } from './dto/update-user-detail.dto';
+import { ResponseUserDbDto } from '../auth/domain/dto/response-user-db.dto';
 
 @Injectable()
 export class UserDetailService {
-  create(createUserDetailDto: CreateUserDetailDto) {
-    return 'This action adds a new userDetail';
+  constructor(
+    @Inject(UserDetailRepository)
+    private readonly userDetailRepository: IUserDetailRepository,
+  ) {}
+  async create(
+    createDto: CreateUserDetailDto,
+    user: ResponseUserDbDto,
+  ): Promise<ResponseUserDetailDbDto> {
+    const createDetail = {
+      ...createDto,
+      userID: user._id,
+    };
+    return await this.userDetailRepository.create(createDetail);
   }
 
-  findAll() {
-    return `This action returns all userDetail`;
+  async findAll(): Promise<ResponseUserDetailDbDto[]> {
+    return await this.userDetailRepository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} userDetail`;
+  async findOne(searchParam: string): Promise<ResponseUserDetailDbDto> {
+    const query: object = isValidObjectId(searchParam)
+      ? { _id: searchParam }
+      : { name: searchParam };
+    const response = await this.userDetailRepository.findOne(query);
+
+    if (!response) {
+      throw new NotFoundException(
+        `Detall de usuario con ${query} no encontrado`,
+      );
+    }
+
+    return response;
   }
 
-  update(id: number, updateUserDetailDto: UpdateUserDetailDto) {
-    return `This action updates a #${id} userDetail`;
+  async update(
+    searchParam: string,
+    updateCategoryDto: UpdateUserDetailDto,
+  ): Promise<ResponseUserDetailDbDto> {
+    return await this.userDetailRepository.update(
+      searchParam,
+      updateCategoryDto,
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} userDetail`;
+  async remove(searchParam: string): Promise<ResponseUserDetailDbDto> {
+    return await this.userDetailRepository.remove(searchParam);
   }
 }
