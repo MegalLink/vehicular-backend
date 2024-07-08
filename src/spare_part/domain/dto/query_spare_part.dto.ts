@@ -1,4 +1,4 @@
-import { IsOptional, IsPositive } from 'class-validator';
+import { IsOptional, IsPositive, IsString } from 'class-validator';
 
 export class QuerySparePartDto {
   @IsOptional()
@@ -21,4 +21,7 @@ export class QuerySparePartDto {
   modelType: string;
   @IsOptional()
   modelTypeYear: string;
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

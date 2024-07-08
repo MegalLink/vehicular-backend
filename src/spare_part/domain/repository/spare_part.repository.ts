@@ -19,7 +19,7 @@ export class SparePartRepository extends BaseRepository<
 
   transform(entity: SparePart): ResponseSparePartDto {
     return {
-      _id: entity._id,
+      _id: entity._id as string,
       code: entity.code,
       name: entity.name,
       description: entity.description,

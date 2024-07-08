@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from '../domain/dto/create-category.dto';
 import { UpdateCategoryDto } from '../domain/dto/update-category.dto';
 import { ICategoryService } from './category.service.interface';
@@ -29,10 +29,16 @@ export class CategoryService implements ICategoryService {
   }
 
   async findOne(searchParam: string): Promise<ResponseCategoryDto> {
-    if (isValidObjectId(searchParam)) {
-      return await this.categoryRepository.findOne({ _id: searchParam });
+    const query: object = isValidObjectId(searchParam)
+      ? { _id: searchParam }
+      : { name: searchParam };
+    const response = await this.categoryRepository.findOne(query);
+
+    if (!response) {
+      throw new NotFoundException(`Categoria con ${query} no encontrada`);
     }
-    return await this.categoryRepository.findOne({ name: searchParam });
+
+    return response;
   }
 
   async update(

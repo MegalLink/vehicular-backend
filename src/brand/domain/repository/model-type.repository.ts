@@ -21,7 +21,7 @@ export class ModelTypeRepository
 
   transform(entity: BrandModelType): ResponseModelTypeDto {
     return {
-      _id: entity._id,
+      _id: entity._id as string,
       name: entity.name,
       modelName: entity.modelName,
     };
