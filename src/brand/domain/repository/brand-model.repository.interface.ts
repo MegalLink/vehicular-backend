@@ -6,7 +6,7 @@ import { ResponseBrandModelDto } from '../dto/response-brand-model.dto';
 export interface IBrandModelRepository {
   create(createBrandDto: CreateBrandDto): Promise<ResponseBrandModelDto>;
   findAll(query?: object): Promise<ResponseBrandModelDto[]>;
-  findOne(searchParam: object): Promise<ResponseBrandModelDto>;
+  findOne(searchParam: object): Promise<ResponseBrandModelDto | undefined>;
   remove(searchParam: string): Promise<ResponseBrandModelDto>;
   update(
     searchParam: string,

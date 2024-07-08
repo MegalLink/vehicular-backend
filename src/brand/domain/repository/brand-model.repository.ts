@@ -20,7 +20,7 @@ export class BrandModelRepository
 
   transform(entity: BrandModel): ResponseBrandModelDto {
     return {
-      _id: entity._id,
+      _id: entity._id as string,
       name: entity.name,
       brandName: entity.brandName,
       image: entity.image,

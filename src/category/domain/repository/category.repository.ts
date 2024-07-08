@@ -20,7 +20,7 @@ export class CategoryRepository
 
   transform(entity: Category): ResponseCategoryDto {
     return {
-      _id: entity._id,
+      _id: entity._id as string,
       name: entity.name,
       title: entity.title,
       image: entity.image,

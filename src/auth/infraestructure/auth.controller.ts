@@ -8,6 +8,8 @@ import {
   HttpStatus,
   Patch,
   Param,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { SignUpUserDto } from '../domain/dto/sign-up.dto';
@@ -23,6 +25,9 @@ import { ResetPasswordDto } from '../domain/dto/reset-password.dto';
 import { ChangePasswordDto } from '../domain/dto/change-password.dto';
 import { QueryUserDto } from '../domain/dto/query-user.dto';
 import { UpdateUserDto } from '../domain/dto/update-user.dto';
+
+import { GoogleAuthGuard } from '../guards/google/google-auth.guard';
+import { SignInResponseDto } from '../domain/dto/sign-in-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -98,6 +103,25 @@ export class AuthController {
         .status(HttpStatus.UNAUTHORIZED)
         .json({ message: 'Invalid or expired token' });
     }
+  }
+
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleLogin() {
+    return { message: 'Google login' };
+  }
+
+  @Get('google/redirect')
+  @UseGuards(GoogleAuthGuard)
+  async googleLoginRedirect(@Req() req: any, @Res() res: Response) {
+    const user: SignInResponseDto = req.user;
+    const frontendUrl = `http://localhost:3000/api/v1/auth/test/?token=${user.token}`;
+    return res.redirect(frontendUrl);
+  }
+
+  @Get('test')
+  async test(@Query('token') token: string) {
+    return { message: 'OK TEST', token };
   }
 
   @Get('status')

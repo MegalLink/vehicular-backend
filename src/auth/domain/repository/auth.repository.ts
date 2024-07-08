@@ -20,7 +20,7 @@ export class UserRepository
 
   transform(entity: User): ResponseUserDbDto {
     return {
-      _id: entity._id,
+      _id: entity._id as string,
       email: entity.email,
       userName: entity.userName,
       password: entity.password,

@@ -13,6 +13,9 @@ export const EnvConfiguration = () => ({
   email_pass: process.env.EMAIL_PASS,
   email_from: process.env.EMAIL_FROM,
   rest_api_url: process.env.REST_API_URL,
+  google_client_id: process.env.GOOGLE_CLIENT_ID,
+  google_client_secret: process.env.GOOGLE_CLIENT_SECRET,
+  google_redirect_url: process.env.GOOGLE_REDIRECT_URL,
 });
 
 export enum EnvironmentConstants {
@@ -30,4 +33,7 @@ export enum EnvironmentConstants {
   email_pass = 'email_pass',
   email_from = 'email_from',
   rest_api_url = 'rest_api_url',
+  google_client_id = 'google_client_id',
+  google_client_secret = 'google_client_secret',
+  google_redirect_url = 'google_redirect_url',
 }

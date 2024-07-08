@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBrandDto } from '../domain/dto/create-brand.dto';
 import { UpdateBrandDto } from '../domain/dto/update-brand.dto';
 import { IBrandService } from './brand.service.interface';
@@ -66,11 +66,16 @@ export class BrandService implements IBrandService {
   }
 
   async findOneBrand(searchParam: string): Promise<ResponseBrandDto> {
-    if (isValidObjectId(searchParam)) {
-      return await this.brandRepository.findOne({ _id: searchParam });
+    const query: object = isValidObjectId(searchParam)
+      ? { _id: searchParam }
+      : { name: searchParam };
+    const response = await this.brandRepository.findOne(query);
+
+    if (!response) {
+      throw new NotFoundException(`Marca con ${query} no encontrada`);
     }
 
-    return await this.brandRepository.findOne({ name: searchParam });
+    return response;
   }
 
   async updateBrand(

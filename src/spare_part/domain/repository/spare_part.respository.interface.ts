@@ -5,7 +5,7 @@ import { UpdateSparePartDto } from '../dto/update_spare_part.dto';
 export interface ISparePartRepository {
   create(createSparePartDto: CreateSparePartDto): Promise<ResponseSparePartDto>;
   findAll(filter?: any): Promise<ResponseSparePartDto[]>;
-  findOne(searchParam: object): Promise<ResponseSparePartDto>;
+  findOne(searchParam: object): Promise<ResponseSparePartDto | undefined>;
   remove(searchParam: string): Promise<ResponseSparePartDto>;
   update(
     searchParam: string,

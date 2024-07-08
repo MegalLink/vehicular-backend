@@ -5,7 +5,7 @@ import { UpdateModelTypeDto } from '../dto/update-model-type.dto';
 export interface IModelTypeRepository {
   create(createDTO: CreateModelTypeDto): Promise<ResponseModelTypeDto>;
   findAll(query?: object): Promise<ResponseModelTypeDto[]>;
-  findOne(searchParam: object): Promise<ResponseModelTypeDto>;
+  findOne(searchParam: object): Promise<ResponseModelTypeDto | undefined>;
   remove(searchParam: string): Promise<ResponseModelTypeDto>;
   update(
     searchParam: string,
