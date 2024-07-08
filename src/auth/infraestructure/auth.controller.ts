@@ -28,10 +28,15 @@ import { UpdateUserDto } from '../domain/dto/update-user.dto';
 
 import { GoogleAuthGuard } from '../guards/google/google-auth.guard';
 import { SignInResponseDto } from '../domain/dto/sign-in-response.dto';
+import { ConfigService } from '@nestjs/config';
+import { EnvironmentConstants } from '../../config/env.config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('signup')
   signUp(@Body() signUpDto: SignUpUserDto) {
@@ -115,7 +120,7 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   async googleLoginRedirect(@Req() req: any, @Res() res: Response) {
     const user: SignInResponseDto = req.user;
-    const frontendUrl = `http://localhost:3000/api/v1/auth/test/?token=${user.token}`;
+    const frontendUrl = `${this.configService.get(EnvironmentConstants.front_url_redirect_login)}?token=${user.token}`;
     return res.redirect(frontendUrl);
   }
 
