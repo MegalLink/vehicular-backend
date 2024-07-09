@@ -1,12 +1,13 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-@Schema({ timestamps: true })
 export class UserDetail extends Document {
   @Prop({ index: true })
   userID: string;
   @Prop({})
-  fullName: string;
+  firstName: string;
+  @Prop({})
+  lastName: string;
   @Prop({})
   identityDocumentNumber: string;
   @Prop({})
@@ -14,19 +15,13 @@ export class UserDetail extends Document {
   @Prop({})
   address: string;
   @Prop({})
-  email: string;
-  @Prop({})
-  postCode: string;
+  postalCode: string;
   @Prop({})
   city: string;
   @Prop({})
-  country: string;
+  province: string;
   @Prop({})
   phone: string;
-  @Prop({})
-  createdAt: Date;
-  @Prop({})
-  updatedAt: Date;
 }
 
 export const UserDetailSchema = SchemaFactory.createForClass(UserDetail);

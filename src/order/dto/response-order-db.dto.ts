@@ -1,10 +1,14 @@
-export class ResponseCartDbDto {
+export class ResponseOrderDbDto {
   _id: string;
+  orderID: string;
   userID: string;
   userDetailID: string;
   totalPrice: number;
   items: {
-    sparePartID: string;
+    code: string;
+    name: string;
+    price: string;
+    description: string;
     quantity: number;
   }[];
   createdAt: Date;

@@ -15,5 +15,6 @@ import { UserDetailRepository } from './repository/user-detail.repository';
     ]),
     AuthModule,
   ],
+  exports: [UserDetailService],
 })
 export class UserDetailModule {}

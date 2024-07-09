@@ -1,9 +1,8 @@
-export class CreateCartDto {
+export class CreateOrderDto {
   userID: string;
   userDetailID: string;
-  totalPrice: number;
   items: {
-    sparePartID: string;
+    code: string;
     quantity: number;
   }[];
 }

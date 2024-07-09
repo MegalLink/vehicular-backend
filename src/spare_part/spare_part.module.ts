@@ -18,5 +18,6 @@ import { AuthModule } from 'src/auth/auth.module';
     ]),
     AuthModule,
   ],
+  exports: [SparePartService],
 })
 export class SparePartModule {}

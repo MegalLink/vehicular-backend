@@ -1,15 +1,13 @@
 export class ResponseUserDetailDbDto {
   _id: string;
-  fullName: string;
+  userID: string;
+  firstName: string;
+  lastName: string;
   identityDocumentNumber: string;
   identityDocumentType: string;
   address: string;
-  email: string;
-  postCode: string;
+  postalCode: string;
   city: string;
-  country: string;
+  province: string;
   phone: string;
-  userID: string;
-  createdAt: Date;
-  updatedAt: Date;
 }

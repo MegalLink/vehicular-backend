@@ -2,7 +2,9 @@ import { IsString } from 'class-validator';
 
 export class CreateUserDetailDto {
   @IsString()
-  fullName: string;
+  firstName: string;
+  @IsString()
+  lastName: string;
   @IsString()
   identityDocumentNumber: string;
   @IsString()
@@ -10,13 +12,11 @@ export class CreateUserDetailDto {
   @IsString()
   address: string;
   @IsString()
-  email: string;
-  @IsString()
-  postCode: string;
+  postalCode: string;
   @IsString()
   city: string;
   @IsString()
-  country: string;
+  province: string;
   @IsString()
   phone: string;
 }
