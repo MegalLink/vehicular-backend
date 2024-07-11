@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { SparePart } from '../entities/spare_part.entity';
 import { ResponseSparePartDto } from '../dto/response_spare_part.dto';
 import { BaseRepository } from 'src/common/domain/repository/mongo_base_repository';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class SparePartRepository extends BaseRepository<
@@ -19,7 +20,7 @@ export class SparePartRepository extends BaseRepository<
 
   transform(entity: SparePart): ResponseSparePartDto {
     return {
-      _id: entity._id as string,
+      _id: (entity._id as ObjectId).toString(),
       code: entity.code,
       name: entity.name,
       description: entity.description,

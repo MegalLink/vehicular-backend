@@ -5,6 +5,7 @@ import { BaseRepository } from 'src/common/domain/repository/mongo_base_reposito
 import { Order } from '../entities/order.entity';
 import { ResponseOrderDbDto } from '../dto/response-order-db.dto';
 import { IOrderRepository } from './order.respository.interface';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class OrderRepository
@@ -20,10 +21,12 @@ export class OrderRepository
 
   transform(entity: Order): ResponseOrderDbDto {
     return {
-      _id: entity._id as string,
+      _id: (entity._id as ObjectId).toString(),
       orderID: entity.orderID,
       userID: entity.userID,
-      userDetailID: entity.userDetailID,
+      userDetail: entity.userDetail,
+      paymentStatus: entity.paymentStatus,
+      status: entity.status,
       totalPrice: entity.totalPrice,
       items: entity.items,
       createdAt: entity.createdAt,

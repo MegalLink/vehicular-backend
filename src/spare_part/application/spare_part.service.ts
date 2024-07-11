@@ -51,6 +51,9 @@ export class SparePartService implements ISparePartService {
     if (filters.maxPrice !== undefined) {
       query.price = { ...query.price, $lte: filters.maxPrice };
     }
+    if (filters.brand) {
+      query.brand = filters.brand;
+    }
     if (filters.brandModel) {
       query.brandModel = filters.brandModel;
     }

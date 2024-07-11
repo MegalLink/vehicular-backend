@@ -1,5 +1,4 @@
-export class ResponseOrderDbDto {
-  _id: string;
+export class ResponseOrderDto {
   orderID: string;
   userID: string;
   userDetail: {

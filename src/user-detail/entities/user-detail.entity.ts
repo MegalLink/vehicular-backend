@@ -1,26 +1,36 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+@Schema({ timestamps: true })
 export class UserDetail extends Document {
   @Prop({ index: true })
   userID: string;
-  @Prop({})
+
+  @Prop()
   firstName: string;
-  @Prop({})
+
+  @Prop()
   lastName: string;
-  @Prop({})
+
+  @Prop()
   identityDocumentNumber: string;
-  @Prop({})
+
+  @Prop()
   identityDocumentType: string;
-  @Prop({})
+
+  @Prop()
   address: string;
-  @Prop({})
+
+  @Prop()
   postalCode: string;
-  @Prop({})
+
+  @Prop()
   city: string;
-  @Prop({})
+
+  @Prop()
   province: string;
-  @Prop({})
+
+  @Prop()
   phone: string;
 }
 
