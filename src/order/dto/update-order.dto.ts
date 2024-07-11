@@ -1,6 +1,11 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateOrderDto } from './create-order.dto';
+import { IsEnum } from 'class-validator';
+import { OrderStatus } from '../enum/order.enum';
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {
-  status: string;
+const allowedStatuses = Object.values(OrderStatus).join(', ');
+
+export class UpdateOrderDto {
+  @IsEnum(OrderStatus, {
+    message: `El status debe ser uno de los valores permitidos: ${allowedStatuses}`,
+  })
+  status: OrderStatus;
 }

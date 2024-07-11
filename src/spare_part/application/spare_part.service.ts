@@ -89,7 +89,9 @@ export class SparePartService implements ISparePartService {
     const response = await this.sparePartRepository.findOne(query);
 
     if (!response) {
-      throw new NotFoundException(`Repuesto con ${query} no encontrado`);
+      throw new NotFoundException(
+        `Repuesto con ${JSON.stringify(query)} no encontrado`,
+      );
     }
 
     return response;

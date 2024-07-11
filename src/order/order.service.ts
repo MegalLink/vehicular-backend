@@ -19,6 +19,7 @@ import { UserDetailService } from '../user-detail/user-detail.service';
 import { ResponseUserDetailDbDto } from '../user-detail/dto/response-user-detail-response-db.dto';
 import { FindOrderQueryDto } from './dto/find-order-query.dto';
 import { ValidRoles } from '../auth/decorators/role-protect.decorator';
+import { OrderStatus } from './enum/order.enum';
 
 @Injectable()
 export class OrderService {
@@ -152,7 +153,21 @@ export class OrderService {
 
     this._denyAccessUser(order, user);
 
-    if (updateDto.status === 'CANCELLED') {
+    if (
+      order.status !== OrderStatus.CANCELLED.toString() &&
+      !user.roles.includes(ValidRoles.admin) &&
+      !user.roles.includes(ValidRoles.manager)
+    ) {
+      throw new BadRequestException(
+        'No tienes permiso para realizar esta operación',
+      );
+    }
+
+    if (
+      updateDto.status === OrderStatus.CANCELLED &&
+      (order.status !== OrderStatus.CANCELLED.toString() ||
+        order.status !== OrderStatus.DELIVERED.toString())
+    ) {
       for (const item of order.items) {
         const sparePart = await this.sparePartService.findOne(item.code);
         await this.sparePartService.update(sparePart._id, {
@@ -161,7 +176,7 @@ export class OrderService {
       }
     }
 
-    const updatedOrder = await this.orderRepository.update(searchParam, {
+    const updatedOrder = await this.orderRepository.update(order._id, {
       status: updateDto.status,
     });
 

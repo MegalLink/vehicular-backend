@@ -78,7 +78,7 @@ export class UserDetailService implements IUserDetailService {
 
     if (!response) {
       throw new NotFoundException(
-        `Detalle de usuario con ${query} no encontrado`,
+        `Detalle de usuario con ${JSON.stringify(query)} no encontrado`,
       );
     }
 
