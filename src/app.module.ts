@@ -29,7 +29,11 @@ import { OrderModule } from './order/order.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    MongooseModule.forRoot(process.env.MONGODB!, { dbName: 'vehicularDB' }),
+    MongooseModule.forRoot(process.env.MONGODB!, {
+      dbName: 'vehicularDB',
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    }),
     SparePartModule,
     FilesModule,
     BrandModule,
