@@ -8,6 +8,8 @@ import {
   HttpStatus,
   Patch,
   Param,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from '../application/auth.service';
 import { SignUpUserDto } from '../domain/dto/sign-up.dto';
@@ -24,9 +26,17 @@ import { ChangePasswordDto } from '../domain/dto/change-password.dto';
 import { QueryUserDto } from '../domain/dto/query-user.dto';
 import { UpdateUserDto } from '../domain/dto/update-user.dto';
 
+import { GoogleAuthGuard } from '../guards/google/google-auth.guard';
+import { SignInResponseDto } from '../domain/dto/sign-in-response.dto';
+import { ConfigService } from '@nestjs/config';
+import { EnvironmentConstants } from '../../config/env.config';
+
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('signup')
   signUp(@Body() signUpDto: SignUpUserDto) {
@@ -98,6 +108,25 @@ export class AuthController {
         .status(HttpStatus.UNAUTHORIZED)
         .json({ message: 'Invalid or expired token' });
     }
+  }
+
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleLogin() {
+    return { message: 'Google login' };
+  }
+
+  @Get('google/redirect')
+  @UseGuards(GoogleAuthGuard)
+  async googleLoginRedirect(@Req() req: any, @Res() res: Response) {
+    const user: SignInResponseDto = req.user;
+    const frontendUrl = `${this.configService.get(EnvironmentConstants.front_url_redirect_login)}?token=${user.token}`;
+    return res.redirect(frontendUrl);
+  }
+
+  @Get('test')
+  async test(@Query('token') token: string) {
+    return { message: 'OK TEST', token };
   }
 
   @Get('status')

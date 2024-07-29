@@ -50,6 +50,7 @@ export class SparePartController {
   }
 
   @Delete(':searchParam')
+  @Auth(ValidRoles.admin, ValidRoles.manager)
   remove(@Param('searchParam') searchParam: string) {
     return this.sparePartService.remove(searchParam);
   }

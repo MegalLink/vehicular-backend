@@ -5,7 +5,7 @@ import { UpdateBrandDto } from '../dto/update-brand.dto';
 export interface IBrandRepository {
   create(createBrandDto: CreateBrandDto): Promise<ResponseBrandDto>;
   findAll(): Promise<ResponseBrandDto[]>;
-  findOne(searchParam: object): Promise<ResponseBrandDto>;
+  findOne(searchParam: object): Promise<ResponseBrandDto | undefined>;
   remove(searchParam: string): Promise<ResponseBrandDto>;
   update(
     searchParam: string,

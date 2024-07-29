@@ -6,6 +6,7 @@ import { BaseRepository } from 'src/common/domain/repository/mongo_base_reposito
 import { BrandModelType } from '../entities/model-type.entity';
 import { ResponseModelTypeDto } from '../dto/response-model-type.dto';
 import { IModelTypeRepository } from './model-type.repository.interface';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class ModelTypeRepository
@@ -21,7 +22,7 @@ export class ModelTypeRepository
 
   transform(entity: BrandModelType): ResponseModelTypeDto {
     return {
-      _id: entity._id,
+      _id: (entity._id as ObjectId).toString(),
       name: entity.name,
       modelName: entity.modelName,
     };

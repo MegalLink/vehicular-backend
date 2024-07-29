@@ -4,7 +4,7 @@ import { UpdateUserDbDto } from '../dto/update-user-db.dto';
 
 export interface IUserRepository {
   create(createUserDto: SignUpUserDto | object): Promise<ResponseUserDbDto>;
-  findOne(searchParam: object): Promise<ResponseUserDbDto>;
+  findOne(searchParam: object): Promise<ResponseUserDbDto | undefined>;
   findAll(filter?: any): Promise<ResponseUserDbDto[]>;
   update(
     searchParam: string,

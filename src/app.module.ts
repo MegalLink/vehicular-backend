@@ -17,6 +17,8 @@ import { CategoryModule } from './category/category.module';
 import { LoggerMiddleware } from './common/domain/repository/logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { NotificationModule } from './notification/notification.module';
+import { UserDetailModule } from './user-detail/user-detail.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -27,13 +29,19 @@ import { NotificationModule } from './notification/notification.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    MongooseModule.forRoot(process.env.MONGODB!, { dbName: 'vehicularDB' }),
+    MongooseModule.forRoot(process.env.MONGODB!, {
+      dbName: 'vehicularDB',
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    }),
     SparePartModule,
     FilesModule,
     BrandModule,
     CategoryModule,
     AuthModule,
     NotificationModule,
+    UserDetailModule,
+    OrderModule,
   ],
   controllers: [],
   providers: [],

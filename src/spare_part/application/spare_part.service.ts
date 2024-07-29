@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSparePartDto } from '../domain/dto/create_spare_part.dto';
 import { UpdateSparePartDto } from '../domain/dto/update_spare_part.dto';
 import { ISparePartService } from './spare_part.service.interface';
@@ -51,25 +51,50 @@ export class SparePartService implements ISparePartService {
     if (filters.maxPrice !== undefined) {
       query.price = { ...query.price, $lte: filters.maxPrice };
     }
-    if (filters.brandModel) {
-      query.part_model = filters.brandModel;
+    if (filters.brand) {
+      query.brand = filters.brand;
     }
-
+    if (filters.brandModel) {
+      query.brandModel = filters.brandModel;
+    }
     if (filters.modelType) {
-      query.part_model = filters.modelType;
+      query.modelType = filters.modelType;
     }
     if (filters.modelTypeYear) {
-      query.year = filters.modelTypeYear;
+      query.modelTypeYear = filters.modelTypeYear;
+    }
+    if (filters.search) {
+      const searchTerms = filters.search
+        .split(' ')
+        .map((term) => new RegExp(term, 'i'));
+      query.$and = searchTerms.map((term) => ({
+        $or: [
+          { name: { $regex: term } },
+          { description: { $regex: term } },
+          { brand: { $regex: term } },
+          { brandModel: { $regex: term } },
+          { modelType: { $regex: term } },
+          { category: { $regex: term } },
+        ],
+      }));
     }
 
     return query;
   }
 
   async findOne(searchParam: string): Promise<ResponseSparePartDto> {
-    if (isValidObjectId(searchParam)) {
-      return await this.sparePartRepository.findOne({ _id: searchParam });
+    const query: object = isValidObjectId(searchParam)
+      ? { _id: searchParam }
+      : { code: searchParam };
+    const response = await this.sparePartRepository.findOne(query);
+
+    if (!response) {
+      throw new NotFoundException(
+        `Repuesto con ${JSON.stringify(query)} no encontrado`,
+      );
     }
-    return await this.sparePartRepository.findOne({ code: searchParam });
+
+    return response;
   }
 
   async update(

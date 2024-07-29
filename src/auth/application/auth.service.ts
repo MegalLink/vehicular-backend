@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Inject,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SignUpUserDto } from '../domain/dto/sign-up.dto';
@@ -27,6 +26,7 @@ import { ChangePasswordDto } from '../domain/dto/change-password.dto';
 import { QueryUserDto } from '../domain/dto/query-user.dto';
 import { UpdateUserDto } from '../domain/dto/update-user.dto';
 import { ValidRoles } from '../decorators/role-protect.decorator';
+import { GoogleUserDto } from '../domain/dto/google-user.dto';
 
 const saltRounds = 10;
 const TokenConfirmed = 'TOKEN_CONFIRMED';
@@ -43,7 +43,11 @@ export class AuthService {
   ) {}
 
   async signUp(signUpDto: SignUpUserDto): Promise<object> {
-    const token: string = this._getJWT({ email: signUpDto.email });
+    const token: string = this._getJWT({
+      email: signUpDto.email,
+      userName: signUpDto.userName,
+      roles: [ValidRoles.user], // Default role on register
+    });
     try {
       const { password, ...userData } = signUpDto;
 
@@ -59,13 +63,13 @@ export class AuthService {
         message: `Un email de confirmación ha sido enviado ${user.email}, porfavor revisa tu bandeja de entrada`,
       };
     } catch (error) {
-      if (error instanceof NotFoundException)
-        throw new UnauthorizedException('Credenciales no validas');
       if (error instanceof BadRequestException) {
         const user = await this._userRepository.findOne({
           email: signUpDto.email,
         });
+
         if (
+          user &&
           !user.isEmailConfirmed &&
           user.confirmationToken !== TokenConfirmed
         ) {
@@ -74,7 +78,7 @@ export class AuthService {
           });
         }
 
-        const message = user.isEmailConfirmed
+        const message = user
           ? `Ya existe una cuenta con el email ${user.email}`
           : `Porfavor confirme su registro, un email ha sido enviado a su correo electrónico`;
         throw new BadRequestException(message);
@@ -85,77 +89,66 @@ export class AuthService {
   }
 
   async signIn(signInDto: SignInUserDto): Promise<SignInResponseDto> {
-    try {
-      const { password, email } = signInDto;
-      const user = await this._userRepository.findOne({
-        email: email,
-        isEmailConfirmed: true,
-      });
+    const { password, email } = signInDto;
+    const user = await this._userRepository.findOne({
+      email: email,
+      isEmailConfirmed: true,
+    });
 
-      if (!compareSync(password, user.password)) {
-        throw new UnauthorizedException('Credenciales no validas');
-      }
-
-      return this._createAuthResponse(user);
-    } catch (error: any) {
-      if (error instanceof NotFoundException) {
-        throw new UnauthorizedException('Credenciales no validas');
-      }
-
-      throw error;
+    if (!user) {
+      throw new UnauthorizedException('Credenciales no validas');
     }
+
+    if (!compareSync(password, user.password)) {
+      throw new UnauthorizedException('Credenciales no validas');
+    }
+
+    return this._createAuthResponse(user);
   }
 
   async confirmResetPassword(token: string): Promise<void> {
-    try {
-      const payload = this._jwtService.verify(token, {
-        secret: this._configService.get<string>(
-          EnvironmentConstants.jwt_secret,
-        ),
-      });
+    const payload = this._jwtService.verify(token, {
+      secret: this._configService.get<string>(EnvironmentConstants.jwt_secret),
+    });
 
-      const user = await this._userRepository.findOne({
-        email: payload.email,
-        confirmationToken: token,
-      });
-
-      const temporaryPassword = this._generateTemporaryPassword();
-
-      user.password = hashSync(temporaryPassword, saltRounds);
-      user.confirmationToken = TokenConfirmed;
-      await this._userRepository.update(user._id, user);
-
-      await this._emailRepository.sendEmail(
-        this._temporaryPasswordEmailData(user.email, temporaryPassword),
-      );
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new UnauthorizedException('Token no válido o expirado');
-      }
-      throw error;
+    const user = await this._userRepository.findOne({
+      email: payload.email,
+      confirmationToken: token,
+    });
+    if (!user) {
+      throw new UnauthorizedException('Credenciales no validas');
     }
+
+    const temporaryPassword = this._generateTemporaryPassword();
+
+    user.password = hashSync(temporaryPassword, saltRounds);
+    user.confirmationToken = TokenConfirmed;
+    await this._userRepository.update(user._id, user);
+
+    await this._emailRepository.sendEmail(
+      this._temporaryPasswordEmailData(user.email, temporaryPassword),
+    );
   }
+
   async confirmEmail(token: string): Promise<object> {
-    try {
-      const payload = this._jwtService.verify(token, {
-        secret: this._configService.get(EnvironmentConstants.jwt_secret),
-      });
+    const payload = this._jwtService.verify(token, {
+      secret: this._configService.get(EnvironmentConstants.jwt_secret),
+    });
 
-      const user = await this._userRepository.findOne({
-        email: payload.email,
-        confirmationToken: token,
-      });
+    const user = await this._userRepository.findOne({
+      email: payload.email,
+      confirmationToken: token,
+    });
 
-      user.isEmailConfirmed = true;
-      user.confirmationToken = TokenConfirmed;
-      await this._userRepository.update(user._id, user);
-
-      return { message: 'Email confirmado exitosamente' };
-    } catch (error) {
-      if (error instanceof NotFoundException)
-        throw new UnauthorizedException('Token expirado');
-      throw error;
+    if (!user) {
+      throw new UnauthorizedException('Token expirado');
     }
+
+    user.isEmailConfirmed = true;
+    user.confirmationToken = TokenConfirmed;
+    await this._userRepository.update(user._id, user);
+
+    return { message: 'Email confirmado exitosamente' };
   }
 
   async checkAuthStatus(user: ResponseUserDbDto) {
@@ -205,7 +198,15 @@ export class AuthService {
       isEmailConfirmed: true,
     });
 
-    user.confirmationToken = this._getJWT({ email: email });
+    if (!user) {
+      throw new UnauthorizedException('Credenciales no validas');
+    }
+
+    user.confirmationToken = this._getJWT({
+      email: email,
+      userName: user.userName,
+      roles: user.roles,
+    });
     await this._userRepository.update(user._id, user);
 
     await this._emailRepository.sendEmail(
@@ -218,30 +219,52 @@ export class AuthService {
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto): Promise<object> {
-    try {
-      const user = await this._userRepository.findOne({
-        email: changePasswordDto.email,
-      });
+    const user = await this._userRepository.findOne({
+      email: changePasswordDto.email,
+    });
 
-      if (!compareSync(changePasswordDto.password, user.password)) {
-        throw new UnauthorizedException('Contraseña invalida');
-      }
-
-      user.password = hashSync(changePasswordDto.newPassword, saltRounds);
-      await this._userRepository.update(user._id, user);
-      return { message: 'Contraseña cambiada exitosamente' };
-    } catch (error) {
-      if (error instanceof NotFoundException)
-        throw new UnauthorizedException('Credenciales no validas');
-      throw error;
+    if (!user) {
+      throw new UnauthorizedException('Credenciales no validas');
     }
+
+    if (!compareSync(changePasswordDto.password, user.password)) {
+      throw new UnauthorizedException('Contraseña invalida');
+    }
+
+    user.password = hashSync(changePasswordDto.newPassword, saltRounds);
+    await this._userRepository.update(user._id, user);
+    return { message: 'Contraseña cambiada exitosamente' };
+  }
+
+  async validateGoogleUser(user: GoogleUserDto): Promise<SignInResponseDto> {
+    const user_db = await this._userRepository.findOne({
+      email: user.email,
+    });
+
+    if (user_db) {
+      return this._createAuthResponse(user_db);
+    }
+    const new_user = {
+      email: user.email,
+      roles: [ValidRoles.user],
+      userName: user.displayName,
+      isEmailConfirmed: true,
+      isActive: true,
+    };
+
+    const create_user = await this._userRepository.create(new_user);
+    return this._createAuthResponse(create_user);
   }
 
   private _createAuthResponse(user: ResponseUserDbDto): SignInResponseDto {
     return {
       email: user.email,
       roles: user.roles,
-      token: this._getJWT({ email: user.email }),
+      token: this._getJWT({
+        email: user.email,
+        userName: user.userName,
+        roles: user.roles,
+      }),
       _id: user._id,
     };
   }

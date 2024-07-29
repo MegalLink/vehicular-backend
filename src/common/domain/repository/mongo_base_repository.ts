@@ -1,13 +1,17 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Model, Document } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { IBaseRepository } from './mongo-base-respository.interface';
 
 @Injectable()
-export abstract class BaseRepository<T extends Document, R> {
+export abstract class BaseRepository<T extends Document, R>
+  implements IBaseRepository<T, R>
+{
   constructor(
     @InjectModel('MODEL_NAME')
     private readonly _model: Model<T>,
@@ -36,21 +40,13 @@ export abstract class BaseRepository<T extends Document, R> {
     throw new BadRequestException('A ocurrido un error inesperado');
   }
 
-  async findOne(searchParam: object): Promise<R> {
-    try {
-      const entity = await this._model.findOne(searchParam).exec();
-      if (!entity) {
-        throw new NotFoundException(
-          `${this.entityName} con id ${searchParam} no encontrado`,
-        );
-      }
-      return this.transform(entity);
-    } catch (error) {
-      this._handleNotfound(undefined, searchParam);
+  async findOne(searchParam: object): Promise<R | undefined> {
+    const entity = await this._model.findOne(searchParam).exec();
+    if (!entity) {
+      return undefined;
     }
-    throw new NotFoundException(
-      `${this.entityName} con id ${searchParam} no encontrado`,
-    );
+
+    return this.transform(entity);
   }
 
   async update(searchParam: string, updateDto: any): Promise<R> {
@@ -83,9 +79,6 @@ export abstract class BaseRepository<T extends Document, R> {
   }
 
   private _handleException(error: any) {
-    if (error instanceof NotFoundException)
-      throw new NotFoundException(error.message);
-
     if (error.code === 11000) {
       throw new BadRequestException(
         `${this.entityName} ya existe en la base de datos ${JSON.stringify(error.keyValue)}`,
@@ -93,7 +86,7 @@ export abstract class BaseRepository<T extends Document, R> {
     }
 
     console.error('Error:', error);
-    throw new BadRequestException('A ocurrido un error inesperado');
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
   }
 
   private _handleNotfound(

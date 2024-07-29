@@ -10,12 +10,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvironmentConstants } from 'src/config/env.config';
 import { JwtStrategy } from './application/jwt.strategy';
 import { NotificationModule } from '../notification/notification.module';
+import { GooggleStragety } from './application/google.strategy';
 
 const STRATEGY = 'jwt';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, UserRepository, JwtStrategy],
+  providers: [
+    AuthService,
+    UserRepository,
+    JwtStrategy,
+    GooggleStragety,
+    ConfigService,
+  ],
   imports: [
     ConfigModule,
     NotificationModule,

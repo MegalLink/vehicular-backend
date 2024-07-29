@@ -14,4 +14,7 @@ export const EnvValidationSchema = joi.object({
   EMAIL_PASS: joi.required(),
   EMAIL_FROM: joi.required(),
   REST_API_URL: joi.required(),
+  GOOGLE_CLIENT_ID: joi.required(),
+  GOOGLE_CLIENT_SECRET: joi.required(),
+  GOOGLE_REDIRECT_URL: joi.required(),
 });

@@ -32,7 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       const { email } = payload;
 
       const user = await this._userRepository.findOne({ email });
-      if (!user.isActive) {
+      if (!user || !user.isActive) {
         throw new UnauthorizedException('Usuario inactivo');
       }
 

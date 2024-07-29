@@ -5,6 +5,7 @@ import { BaseRepository } from 'src/common/domain/repository/mongo_base_reposito
 import { User } from '../entities/users.entity';
 import { ResponseUserDbDto } from '../dto/response-user-db.dto';
 import { IUserRepository } from './auth.repository.interface';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class UserRepository
@@ -20,7 +21,7 @@ export class UserRepository
 
   transform(entity: User): ResponseUserDbDto {
     return {
-      _id: entity._id,
+      _id: (entity._id as ObjectId).toString(),
       email: entity.email,
       userName: entity.userName,
       password: entity.password,
