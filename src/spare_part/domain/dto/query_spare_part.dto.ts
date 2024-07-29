@@ -16,6 +16,8 @@ export class QuerySparePartDto {
   @IsPositive()
   maxPrice: number;
   @IsOptional()
+  brand: string;
+  @IsOptional()
   brandModel: string;
   @IsOptional()
   modelType: string;

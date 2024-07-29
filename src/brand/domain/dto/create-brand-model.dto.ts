@@ -1,4 +1,4 @@
-import { IsString, MinLength, IsUrl } from 'class-validator';
+import { IsString, MinLength } from 'class-validator';
 export class CreateBrandModelDto {
   @IsString()
   @MinLength(1)
@@ -6,7 +6,4 @@ export class CreateBrandModelDto {
   @IsString()
   @MinLength(1)
   brandName: string;
-  @IsString()
-  @IsUrl()
-  image: string;
 }

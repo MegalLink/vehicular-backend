@@ -51,6 +51,9 @@ export class SparePartService implements ISparePartService {
     if (filters.maxPrice !== undefined) {
       query.price = { ...query.price, $lte: filters.maxPrice };
     }
+    if (filters.brand) {
+      query.brand = filters.brand;
+    }
     if (filters.brandModel) {
       query.brandModel = filters.brandModel;
     }
@@ -86,7 +89,9 @@ export class SparePartService implements ISparePartService {
     const response = await this.sparePartRepository.findOne(query);
 
     if (!response) {
-      throw new NotFoundException(`Repuesto con ${query} no encontrado`);
+      throw new NotFoundException(
+        `Repuesto con ${JSON.stringify(query)} no encontrado`,
+      );
     }
 
     return response;

@@ -4,7 +4,8 @@ import { v2 } from 'cloudinary';
 import { EnvironmentConstants } from 'src/config/env.config';
 import { ResponseFileDto } from 'src/files/domain/dto/reponse_file.dto';
 import { IGeneriFileRepository } from './file.repository.interface';
-import fs from 'fs';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fs = require('fs');
 
 @Injectable()
 export class CloudinaryRepository implements IGeneriFileRepository {

@@ -14,6 +14,7 @@ import {
 } from './domain/entities/model-type.entity';
 import { ModelTypeRepository } from './domain/repository/model-type.repository';
 import { BrandModelRepository } from './domain/repository/brand-model.repository';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   controllers: [BrandController],
@@ -24,6 +25,7 @@ import { BrandModelRepository } from './domain/repository/brand-model.repository
     ModelTypeRepository,
   ],
   imports: [
+    AuthModule,
     MongooseModule.forFeature([{ name: Brand.name, schema: BrandSchema }]),
     MongooseModule.forFeature([
       { name: BrandModel.name, schema: BrandModelSchema },
