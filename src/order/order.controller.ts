@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Headers,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -16,6 +17,8 @@ import { ResponseUserDbDto } from '../auth/domain/dto/response-user-db.dto';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { ValidRoles } from '../auth/decorators/role-protect.decorator';
 import { FindOrderQueryDto } from './dto/find-order-query.dto';
+import { StripePaymentDto } from './dto/stripe-payment.dto';
+import * as bodyParser from 'body-parser';
 
 @Controller('order')
 export class OrderController {
@@ -59,5 +62,22 @@ export class OrderController {
   @Auth(ValidRoles.manager, ValidRoles.admin)
   remove(@Param('id') id: string, @GetUser() user: ResponseUserDbDto) {
     return this.orderService.remove(id, user);
+  }
+
+  @Post('stripe-payment')
+  @Auth(ValidRoles.user)
+  stripePayment(
+    @Body() payment: StripePaymentDto,
+    @GetUser() user: ResponseUserDbDto,
+  ) {
+    return this.orderService.stripePayment(payment, user);
+  }
+
+  @Post('stripe-payment-webhook')
+  async stripeWebhook(
+    @Body() body: Buffer,
+    @Headers('stripe-signature') signature: string,
+  ) {
+    return this.orderService.stripeWebhook(body, signature);
   }
 }

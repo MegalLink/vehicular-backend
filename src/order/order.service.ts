@@ -19,16 +19,28 @@ import { UserDetailService } from '../user-detail/user-detail.service';
 import { ResponseUserDetailDbDto } from '../user-detail/dto/response-user-detail-response-db.dto';
 import { FindOrderQueryDto } from './dto/find-order-query.dto';
 import { ValidRoles } from '../auth/decorators/role-protect.decorator';
-import { OrderStatus } from './enum/order.enum';
+import { OrderStatus, PaymentStatus } from './enum/order.enum';
+import { StripePaymentDto } from './dto/stripe-payment.dto';
+import { ConfigService } from '@nestjs/config';
+import { EnvironmentConstants } from '../config/env.config';
+import Stripe from 'stripe';
 
 @Injectable()
 export class OrderService {
+  private _stripe: Stripe;
+
   constructor(
     @Inject(OrderRepository)
     private readonly orderRepository: IOrderRepository,
     private readonly sparePartService: SparePartService,
     private readonly userDetailService: UserDetailService,
-  ) {}
+    private readonly _configService: ConfigService,
+  ) {
+    this._stripe = new Stripe(
+      this._configService.get(EnvironmentConstants.stripe_secret_key)!,
+      { apiVersion: '2024-06-20' },
+    );
+  }
 
   async create(
     createDto: CreateOrderDto,
@@ -66,13 +78,6 @@ export class OrderService {
       totalPrice += sparePart.price * item.quantity;
     }
 
-    for (const item of orderItems) {
-      const sparePart = await this.sparePartService.findOne(item.code);
-      await this.sparePartService.update(sparePart._id, {
-        stock: sparePart.stock - item.quantity,
-      });
-    }
-
     const orderID = this._generateOrderID();
 
     const userDetail: ResponseUserDetailDbDto =
@@ -82,7 +87,6 @@ export class OrderService {
         `Detalles de usuario con id ${createOrder.userDetailID} no encontrados`,
       );
     }
-    console.log('User detail', userDetail);
 
     const newOrder: CreateOrderDBDto = {
       orderID,
@@ -176,6 +180,15 @@ export class OrderService {
       }
     }
 
+    if (updateDto.paymentStatus === PaymentStatus.PAID) {
+      for (const item of order.items) {
+        const sparePart = await this.sparePartService.findOne(item.code);
+        await this.sparePartService.update(sparePart._id, {
+          stock: sparePart.stock - item.quantity,
+        });
+      }
+    }
+
     const updatedOrder = await this.orderRepository.update(order._id, {
       status: updateDto.status,
     });
@@ -200,8 +213,103 @@ export class OrderService {
     return await this.orderRepository.remove(searchParam);
   }
 
+  async stripeWebhook(body: Buffer, signature: string) {
+    const endpointSecret = this._configService.get<string>(
+      EnvironmentConstants.stripe_webhook_secret,
+    );
+
+    let event: Stripe.Event;
+
+    try {
+      event = this._stripe.webhooks.constructEvent(
+        body,
+        signature,
+        endpointSecret!,
+      );
+    } catch (err) {
+      throw new BadRequestException(`Webhook Error: ${err.message}`);
+    }
+    console.log('EVENT', event);
+
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object as Stripe.Checkout.Session;
+        const orderID: string = session.metadata!.orderID!;
+        const paymentStatus: string = session.payment_status.toString();
+        const paymentID: string | undefined =
+          session.payment_intent?.toString();
+        console.log('OrderID: ', orderID, 'PaymentStatus: ', paymentStatus);
+        const order = await this.orderRepository.findOne({ orderID: orderID });
+        if (!order) {
+          throw new NotFoundException(`Orden con id ${orderID} no encontrada`);
+        }
+        await this.orderRepository.update(order._id, {
+          paymentStatus: paymentStatus,
+        });
+
+        for (const item of order.items) {
+          const sparePart = await this.sparePartService.findOne(item.code);
+          await this.sparePartService.update(sparePart._id, {
+            stock: sparePart.stock - item.quantity,
+          });
+        }
+        // TODO: send email with recipe
+
+        break;
+      default:
+        console.log(`Unhandled event type ${event.type}`);
+        return;
+    }
+  }
+
+  async stripePayment(
+    paymentInformation: StripePaymentDto,
+    user: ResponseUserDbDto,
+  ) {
+    const order: ResponseOrderDto = await this.findOne(
+      paymentInformation.orderID,
+      user,
+    );
+
+    if (order.paymentStatus === PaymentStatus.PAID) {
+      throw new BadRequestException('La orden ya ha sido pagada');
+    }
+
+    const lineItems = order.items.map((item) => ({
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: item.name,
+          description: item.description,
+        },
+        // Adjust unit_amount to be in cents.
+        unit_amount: Math.max(Math.round(item.price * 100), 50),
+      },
+      quantity: item.quantity,
+    }));
+
+    // Validate that the order's total price is >= $0.50
+    if (order.totalPrice < 0.5) {
+      throw new BadRequestException(
+        'The order total must be at least $0.50 USD',
+      );
+    }
+
+    const session = await this._stripe.checkout.sessions.create({
+      line_items: lineItems,
+      mode: 'payment',
+      metadata: {
+        orderID: order.orderID,
+      },
+      success_url: paymentInformation.successURL,
+      cancel_url: paymentInformation.cancelURL,
+    });
+
+    return { url: session.url };
+  }
+
   private _generateOrderID(): string {
-    return uuidv4().slice(0, 10);
+    return uuidv4().slice(0, 13).replace('-', '');
   }
 
   private _transformToResponseOrderDto(

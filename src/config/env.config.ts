@@ -17,6 +17,10 @@ export const EnvConfiguration = () => ({
   google_client_secret: process.env.GOOGLE_CLIENT_SECRET,
   google_redirect_url: process.env.GOOGLE_REDIRECT_URL,
   front_url_redirect_login: process.env.FRONT_URL_REDIRECT_LOGIN,
+  stripe_secret_key: process.env.STRIPE_SECRET_KEY,
+  stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+  stripe_success_url: process.env.STRIPE_SUCCESS_URL,
+  stripe_cancel_url: process.env.STRIPE_CANCEL_URL,
 });
 
 export enum EnvironmentConstants {
@@ -38,4 +42,6 @@ export enum EnvironmentConstants {
   google_client_secret = 'google_client_secret',
   google_redirect_url = 'google_redirect_url',
   front_url_redirect_login = 'front_url_redirect_login',
+  stripe_secret_key = 'stripe_secret_key',
+  stripe_webhook_secret = 'stripe_webhook_secret',
 }

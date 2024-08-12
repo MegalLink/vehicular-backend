@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,11 @@ async function bootstrap() {
         enableImplicitConversion: true,
       },
     }),
+  );
+
+  app.use(
+    '/api/v1/order/stripe-payment-webhook',
+    bodyParser.raw({ type: 'application/json' }),
   );
 
   await app.listen(+process.env.PORT!);
