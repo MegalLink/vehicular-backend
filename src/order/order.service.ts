@@ -275,21 +275,29 @@ export class OrderService {
       throw new BadRequestException('La orden ya ha sido pagada');
     }
 
-    const lineItems = order.items.map((item) => ({
-      price_data: {
-        currency: 'usd',
-        product_data: {
-          name: item.name,
-          description: item.description,
-        },
-        // Adjust unit_amount to be in cents.
-        unit_amount: Math.max(Math.round(item.price * 100), 50),
-      },
-      quantity: item.quantity,
-    }));
+    const lineItems = order.items.map((item) => {
+      // Calculate the price including the iva (tax)
+      const priceWithTax =
+        item.price + (item.price * paymentInformation.tax) / 100;
 
-    // Validate that the order's total price is >= $0.50
-    if (order.totalPrice < 0.5) {
+      return {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: item.name,
+            description: item.description,
+          },
+          // Adjust unit_amount to be in cents, and apply the minimum threshold of $0.50 USD for stripe.
+          unit_amount: Math.max(Math.round(priceWithTax * 100), 50),
+        },
+        quantity: item.quantity,
+      };
+    });
+
+    // Validate that the order's total price is >= $0.50 USD
+    const totalPriceWithTax =
+      order.totalPrice + (order.totalPrice * paymentInformation.tax) / 100;
+    if (totalPriceWithTax < 0.5) {
       throw new BadRequestException(
         'The order total must be at least $0.50 USD',
       );

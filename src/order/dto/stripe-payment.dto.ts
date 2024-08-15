@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsUrl } from 'class-validator';
 
 export class StripePaymentDto {
   @IsNotEmpty()
@@ -10,4 +10,6 @@ export class StripePaymentDto {
   @IsNotEmpty()
   @IsUrl()
   cancelURL: string;
+  @IsNumber()
+  tax: number;
 }
