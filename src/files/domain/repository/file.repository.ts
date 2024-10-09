@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { CloudinaryRepository } from './cloudinary.repository';
-import { LocalFilesRepository } from './local.image.repository';
+import { LocalFilesRepository } from './local.file.repository';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentConstants } from 'src/config/env.config';
-import { IGeneriFileRepository } from './file.repository.interface';
+import { IGenericFileRepository } from './file.repository.interface';
 import { ResponseFileDto } from 'src/files/domain/dto/reponse_file.dto';
+import Buffer from 'node:buffer';
 
 @Injectable()
-export class FileRepository implements IGeneriFileRepository {
-  private readonly _repository: IGeneriFileRepository;
+export class FileRepository implements IGenericFileRepository {
+  private readonly _repository: IGenericFileRepository;
 
   constructor(private readonly _configService: ConfigService) {
     const environment = this._configService.get(
@@ -22,7 +23,17 @@ export class FileRepository implements IGeneriFileRepository {
     }
   }
 
-  async uploadImage(filePath: string): Promise<ResponseFileDto> {
-    return await this._repository.uploadImage(filePath);
+  async uploadFile(
+    filePath: string,
+    folderOutputPath: string,
+  ): Promise<ResponseFileDto> {
+    return await this._repository.uploadFile(filePath, folderOutputPath);
+  }
+
+  async uploadBufferFile(
+    buffer: Buffer,
+    folderOutputPath: string,
+  ): Promise<ResponseFileDto> {
+    return await this._repository.uploadBufferFile(buffer, folderOutputPath);
   }
 }

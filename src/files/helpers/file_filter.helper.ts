@@ -1,3 +1,5 @@
+import { ImageFileExtensionEnum } from './ImageFileExtensionEnum';
+
 export const fileFilter = (
   request: Express.Request,
   file: Express.Multer.File,
@@ -6,9 +8,11 @@ export const fileFilter = (
   if (!file) return callback(new Error('El archivo esta vacio'), false);
 
   const fileExtension = file.mimetype.split('/')[1];
-  const allowedExtensions = ['jpeg', 'png', 'jpg'];
+  const allowedImageExtensions: string[] = Object.values(
+    ImageFileExtensionEnum,
+  );
 
-  if (allowedExtensions.includes(fileExtension)) {
+  if (allowedImageExtensions.includes(fileExtension)) {
     callback(null, true);
   }
 

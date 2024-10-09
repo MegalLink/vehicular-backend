@@ -24,6 +24,13 @@ import { StripePaymentDto } from './dto/stripe-payment.dto';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentConstants } from '../config/env.config';
 import Stripe from 'stripe';
+import {
+  EmailRepository,
+  EmailRepositoryData,
+} from '../notification/domain/repository/email.repository';
+import { IPdfRepository } from '../common/domain/repository/pdf-repository.interface';
+import { FileRepository } from '../files/domain/repository/file.repository';
+import { PdfRepository } from '../common/domain/repository/pdf-repository';
 
 @Injectable()
 export class OrderService {
@@ -35,6 +42,10 @@ export class OrderService {
     private readonly sparePartService: SparePartService,
     private readonly userDetailService: UserDetailService,
     private readonly _configService: ConfigService,
+    private readonly _emailRepository: EmailRepository,
+    @Inject(PdfRepository)
+    private readonly _pdfRepository: IPdfRepository,
+    private readonly _fileRepository: FileRepository,
   ) {
     this._stripe = new Stripe(
       this._configService.get(EnvironmentConstants.stripe_secret_key)!,
@@ -235,6 +246,8 @@ export class OrderService {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session;
         const orderID: string = session.metadata!.orderID!;
+        const userEmail: string = session.metadata!.userEmail!;
+        const tax: string = session.metadata!.tax!;
         const paymentStatus: string = session.payment_status.toString();
         const paymentID: string | undefined =
           session.payment_intent?.toString();
@@ -253,11 +266,25 @@ export class OrderService {
             stock: sparePart.stock - item.quantity,
           });
         }
-        // TODO: send email with recipe
+        const invoicePDF: Buffer = await this._pdfRepository.generateInvoice(
+          order,
+          { tax: +tax, paymentWith: 'Stripe' },
+        );
+
+        const response = await this._fileRepository.uploadBufferFile(
+          invoicePDF,
+          'pdf',
+        );
+
+        const emailData: EmailRepositoryData = this._sendReceiptEmailData(
+          userEmail,
+          order.userDetail.firstName,
+          response.fileUrl,
+        );
+        await this._emailRepository.sendEmail(emailData);
 
         break;
       default:
-        console.log(`Unhandled event type ${event.type}`);
         return;
     }
   }
@@ -275,11 +302,18 @@ export class OrderService {
       throw new BadRequestException('La orden ya ha sido pagada');
     }
 
-    const lineItems = order.items.map((item) => {
-      // Calculate the price including the iva (tax)
-      const priceWithTax =
-        item.price + (item.price * paymentInformation.tax) / 100;
+    const roundToTwoDecimals = (num: number) => Math.round(num * 100) / 100;
+    // Calculate the total price with tax
+    let totalPriceWithTax = 0;
 
+    const lineItems = order.items.map((item) => {
+      const priceWithTax = roundToTwoDecimals(
+        item.price * paymentInformation.tax + item.price,
+      );
+
+      totalPriceWithTax += roundToTwoDecimals(priceWithTax * item.quantity);
+      const unit_amount = Math.max(Math.round(priceWithTax * 100), 50); // Ensure a minimum of $0.50 USD
+      console.log('UNIT AMOUNT', unit_amount);
       return {
         price_data: {
           currency: 'usd',
@@ -287,16 +321,15 @@ export class OrderService {
             name: item.name,
             description: item.description,
           },
-          // Adjust unit_amount to be in cents, and apply the minimum threshold of $0.50 USD for stripe.
-          unit_amount: Math.max(Math.round(priceWithTax * 100), 50),
+          // Adjust unit_amount to be in cents (for Stripe)
+          unit_amount: unit_amount,
         },
         quantity: item.quantity,
       };
     });
 
-    // Validate that the order's total price is >= $0.50 USD
-    const totalPriceWithTax =
-      order.totalPrice + (order.totalPrice * paymentInformation.tax) / 100;
+    // Validate that the total price of the order is >= $0.50 USD
+    console.log('TOTAL PRICE WITH TAX', totalPriceWithTax);
     if (totalPriceWithTax < 0.5) {
       throw new BadRequestException(
         'The order total must be at least $0.50 USD',
@@ -308,6 +341,8 @@ export class OrderService {
       mode: 'payment',
       metadata: {
         orderID: order.orderID,
+        userEmail: user.email,
+        tax: paymentInformation.tax,
       },
       success_url: paymentInformation.successURL,
       cancel_url: paymentInformation.cancelURL,
@@ -379,5 +414,30 @@ export class OrderService {
     }
 
     return query;
+  }
+
+  private _sendReceiptEmailData(
+    email: string,
+    username: string,
+    receiptURL: string,
+  ): EmailRepositoryData {
+    return {
+      to: [email],
+      subject: '¡Tu Recibo de Compra Está Listo!',
+      body: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <h2>¡Hola, ${username}!</h2>
+        <p>Gracias por tu compra. Nos complace informarte que tu recibo de compra está listo.</p>
+        <p>Aquí tienes el enlace para acceder a tu recibo:</p>
+        <a href="${receiptURL}" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Ver Recibo</a>
+        <br>
+        <p>Si el enlace no funciona, copia y pega el siguiente enlace en tu navegador:</p>
+        <p><a href="${receiptURL}" style="color: #007bff;">${receiptURL}</a></p>
+        <br>
+        <p>¡Esperamos que disfrutes de tu compra!</p>
+        <p>Saludos,<br>El equipo de soporte</p>
+      </div>
+    `,
+    };
   }
 }

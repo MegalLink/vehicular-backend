@@ -16,13 +16,23 @@ import { Auth } from 'src/auth/decorators/auth.decorator';
 import { ValidRoles } from 'src/auth/decorators/role-protect.decorator';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { ResponseUserDbDto } from 'src/auth/domain/dto/response-user-db.dto';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ResponseSparePartDto } from '../domain/dto/response_spare_part.dto';
 
+@ApiTags('Spare Part')
 @Controller('spare-part')
 export class SparePartController {
   constructor(private readonly sparePartService: SparePartService) {}
 
   @Post()
   @Auth(ValidRoles.admin, ValidRoles.manager)
+  @ApiBearerAuth()
+  @ApiBody({ type: CreateSparePartDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Spare part created',
+    type: ResponseSparePartDto,
+  })
   create(
     @Body() createSparePartDto: CreateSparePartDto,
     @GetUser() user: ResponseUserDbDto,
@@ -31,16 +41,32 @@ export class SparePartController {
   }
 
   @Get()
+  @ApiResponse({
+    status: 200,
+    description: 'Get all spare parts',
+    type: [ResponseSparePartDto],
+  })
   async findAll(@Query() queryDto: QuerySparePartDto) {
     return this.sparePartService.findAll(queryDto);
   }
 
   @Get(':searchParam')
+  @ApiResponse({
+    status: 200,
+    description: 'Update spare part',
+    type: ResponseSparePartDto,
+  })
   findOne(@Param('searchParam') searchParam: string) {
     return this.sparePartService.findOne(searchParam);
   }
 
   @Patch(':searchParam')
+  @ApiResponse({
+    status: 200,
+    description: 'Update spare part',
+    type: ResponseSparePartDto,
+  })
+  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.manager)
   update(
     @Param('searchParam') searchParam: string,
@@ -50,6 +76,12 @@ export class SparePartController {
   }
 
   @Delete(':searchParam')
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Delete spare part',
+    type: ResponseSparePartDto,
+  })
   @Auth(ValidRoles.admin, ValidRoles.manager)
   remove(@Param('searchParam') searchParam: string) {
     return this.sparePartService.remove(searchParam);

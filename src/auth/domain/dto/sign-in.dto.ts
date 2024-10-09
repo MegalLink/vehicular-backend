@@ -8,8 +8,11 @@ import {
 } from 'class-validator';
 
 export class SignInUserDto {
-  @IsEmail({}, { message: 'El correo electrónico no es válido' })
-  @IsString({ message: 'El correo electrónico debe ser una cadena de texto' })
+  @IsEmail(
+    {},
+    { message: 'El campo email debe ser un correo electrónico válido' },
+  )
+  @IsString({ message: 'El campo email debe ser una cadena de texto' })
   @IsLowercase({ message: 'El correo electrónico debe estar en minúsculas' })
   email: string;
 

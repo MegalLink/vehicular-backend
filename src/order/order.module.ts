@@ -8,16 +8,21 @@ import { OrderRepository } from './repository/order.repository';
 import { SparePartModule } from '../spare_part/spare_part.module';
 import { UserDetailModule } from '../user-detail/user-detail.module';
 import { ConfigModule } from '@nestjs/config';
+import { NotificationModule } from '../notification/notification.module';
+import { PdfRepository } from '../common/domain/repository/pdf-repository';
+import { FilesModule } from '../files/files.module';
 
 @Module({
   controllers: [OrderController],
-  providers: [OrderService, OrderRepository],
+  providers: [OrderService, OrderRepository, PdfRepository],
   imports: [
     ConfigModule,
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     AuthModule,
     SparePartModule,
     UserDetailModule,
+    NotificationModule,
+    FilesModule,
   ],
 })
 export class OrderModule {}

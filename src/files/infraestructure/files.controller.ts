@@ -36,12 +36,12 @@ export class FilesController {
     return this.filesService.uploadImage(image);
   }
 
-  @Get('image/:imageName')
+  @Get('local/:fileName')
   getLocalImage(
     @Res() response: Response,
-    @Param('imageName') imageName: string,
+    @Param('fileName') fileName: string,
   ) {
-    const path = this.filesService.getStaticImage(imageName);
+    const path = this.filesService.getStaticFile(fileName);
 
     response.sendFile(path);
   }
