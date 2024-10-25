@@ -27,6 +27,9 @@ import { QueryUserDto } from '../domain/dto/query-user.dto';
 import { UpdateUserDto } from '../domain/dto/update-user.dto';
 import { ValidRoles } from '../decorators/role-protect.decorator';
 import { GoogleUserDto } from '../domain/dto/google-user.dto';
+import { SignUpResponseDto } from '../domain/dto/sign-up-response.dto';
+import { ResetPasswordResponseDto } from '../domain/dto/reset-password-response.dto';
+import { ChangePasswordResponseDto } from '../domain/dto/change-password-response.dto';
 
 const saltRounds = 10;
 const TokenConfirmed = 'TOKEN_CONFIRMED';
@@ -42,7 +45,7 @@ export class AuthService {
     private readonly _configService: ConfigService,
   ) {}
 
-  async signUp(signUpDto: SignUpUserDto): Promise<object> {
+  async signUp(signUpDto: SignUpUserDto): Promise<SignUpResponseDto> {
     const token: string = this._getJWT({
       email: signUpDto.email,
       userName: signUpDto.userName,
@@ -191,7 +194,9 @@ export class AuthService {
     return await this._userRepository.update(userUpdateID, userUpdate);
   }
 
-  async resetPassword(input: ResetPasswordDto): Promise<object> {
+  async resetPassword(
+    input: ResetPasswordDto,
+  ): Promise<ResetPasswordResponseDto> {
     const email = input.email;
     const user = await this._userRepository.findOne({
       email: email,
@@ -218,7 +223,9 @@ export class AuthService {
     };
   }
 
-  async changePassword(changePasswordDto: ChangePasswordDto): Promise<object> {
+  async changePassword(
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<ChangePasswordResponseDto> {
     const user = await this._userRepository.findOne({
       email: changePasswordDto.email,
     });

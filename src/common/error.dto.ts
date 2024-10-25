@@ -39,3 +39,22 @@ export class ErrorBadRequestDto {
   })
   statusCode: number;
 }
+export class ErrorUnauthorizedDto {
+  @ApiProperty({
+    description: 'The error message describing the issue.',
+    example: 'Invalid Credentials',
+  })
+  message: string;
+
+  @ApiProperty({
+    description: 'The type or name of the error.',
+    example: 'Unauthorized',
+  })
+  error: string;
+
+  @ApiProperty({
+    description: 'The HTTP status code associated with the error.',
+    example: 401,
+  })
+  statusCode: number;
+}
