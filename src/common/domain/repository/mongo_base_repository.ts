@@ -27,7 +27,7 @@ export abstract class BaseRepository<T extends Document, R>
     } catch (error) {
       this._handleException(error);
     }
-    throw new BadRequestException('A ocurrido un error inesperado');
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
   }
 
   async findAll(query: object = {}): Promise<R[]> {
@@ -37,7 +37,7 @@ export abstract class BaseRepository<T extends Document, R>
     } catch (error) {
       this._handleException(error);
     }
-    throw new BadRequestException('A ocurrido un error inesperado');
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
   }
 
   async findOne(searchParam: object): Promise<R | undefined> {
@@ -60,9 +60,7 @@ export abstract class BaseRepository<T extends Document, R>
     } catch (error) {
       this._handleException(error);
     }
-    throw new NotFoundException(
-      `${this.entityName} con id ${searchParam} no encontrado`,
-    );
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
   }
 
   async remove(searchParam: string): Promise<R> {
@@ -71,11 +69,10 @@ export abstract class BaseRepository<T extends Document, R>
       this._handleNotfound(entity, searchParam);
       return this.transform(entity!);
     } catch (error) {
+      console.log('Remove error', error);
       this._handleException(error);
     }
-    throw new NotFoundException(
-      `${this.entityName} con id ${searchParam} no encontrado`,
-    );
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
   }
 
   private _handleException(error: any) {
@@ -85,8 +82,7 @@ export abstract class BaseRepository<T extends Document, R>
       );
     }
 
-    console.error('Error:', error);
-    throw new InternalServerErrorException('A ocurrido un error inesperado');
+    throw error;
   }
 
   private _handleNotfound(
@@ -94,9 +90,14 @@ export abstract class BaseRepository<T extends Document, R>
     searchParam?: string | object,
   ) {
     if (!entity) {
+      searchParam =
+        typeof searchParam === 'object'
+          ? JSON.stringify(searchParam)
+          : JSON.stringify({ _id: searchParam });
       const message = searchParam
-        ? `${this.entityName} con ${JSON.stringify(searchParam)} no encontrado`
+        ? `${this.entityName} con ${searchParam} no encontrado`
         : `No se puedo crear ${this.entityName}`;
+
       throw new NotFoundException(message);
     }
   }

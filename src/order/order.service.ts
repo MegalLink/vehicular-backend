@@ -171,7 +171,7 @@ export class OrderService {
     if (
       order.status !== OrderStatus.CANCELLED.toString() &&
       !user.roles.includes(ValidRoles.admin) &&
-      !user.roles.includes(ValidRoles.manager)
+      !user.roles.includes(ValidRoles.employee)
     ) {
       throw new BadRequestException(
         'No tienes permiso para realizar esta operación',
@@ -328,8 +328,6 @@ export class OrderService {
       };
     });
 
-    // Validate that the total price of the order is >= $0.50 USD
-    console.log('TOTAL PRICE WITH TAX', totalPriceWithTax);
     if (totalPriceWithTax < 0.5) {
       throw new BadRequestException(
         'The order total must be at least $0.50 USD',
@@ -384,7 +382,7 @@ export class OrderService {
     if (
       orderDB.userID !== user._id &&
       !user.roles.includes(ValidRoles.admin) &&
-      !user.roles.includes(ValidRoles.manager)
+      !user.roles.includes(ValidRoles.employee)
     ) {
       throw new BadRequestException('No tienes permiso para ver esta orden');
     }

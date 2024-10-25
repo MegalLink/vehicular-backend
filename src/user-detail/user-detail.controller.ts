@@ -16,13 +16,28 @@ import { ResponseUserDbDto } from '../auth/domain/dto/response-user-db.dto';
 import { QueryUserDetailDto } from './dto/query-user-detail.dto';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { ValidRoles } from '../auth/decorators/role-protect.decorator';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ResponseUserDetailDbDto } from './dto/response-user-detail-response-db.dto';
+import { ErrorBadRequestDto, ErrorNotFoundDto } from '../common/error.dto';
 
+@ApiTags('User Detail')
 @Controller('user-detail')
 export class UserDetailController {
   constructor(private readonly userDetailService: UserDetailService) {}
 
   @Post()
   @Auth(ValidRoles.user)
+  @ApiBody({ type: CreateUserDetailDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Create user detail',
+    type: ResponseUserDetailDbDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request response',
+    type: ErrorBadRequestDto,
+  })
   create(
     @Body() createUserDetailDto: CreateUserDetailDto,
     @GetUser() user: ResponseUserDbDto,
@@ -32,6 +47,11 @@ export class UserDetailController {
 
   @Get()
   @Auth(ValidRoles.user)
+  @ApiResponse({
+    status: 200,
+    description: 'Get all user details',
+    type: [ResponseUserDetailDbDto],
+  })
   findAll(
     @Query() query: QueryUserDetailDto,
     @GetUser() user: ResponseUserDbDto,
@@ -41,12 +61,38 @@ export class UserDetailController {
 
   @Get(':id')
   @Auth(ValidRoles.user)
+  @ApiResponse({
+    status: 200,
+    description: 'User details with role user',
+    type: ResponseUserDetailDbDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found item _id',
+    type: ErrorNotFoundDto,
+  })
   findOne(@Param('id') id: string, @GetUser() user: ResponseUserDbDto) {
     return this.userDetailService.findOne(id, user);
   }
 
   @Patch(':id')
   @Auth(ValidRoles.user)
+  @ApiResponse({
+    status: 200,
+    description: 'Update user detail',
+    type: ResponseUserDetailDbDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found item _id',
+    type: ErrorNotFoundDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request response',
+    type: ErrorBadRequestDto,
+  })
+  @ApiBody({ type: UpdateUserDetailDto })
   update(
     @Param('id') id: string,
     @Body() updateUserDetailDto: UpdateUserDetailDto,
@@ -57,6 +103,16 @@ export class UserDetailController {
 
   @Delete(':id')
   @Auth(ValidRoles.user)
+  @ApiResponse({
+    status: 200,
+    description: 'Delete user detail',
+    type: ResponseUserDetailDbDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found item _id',
+    type: ErrorNotFoundDto,
+  })
   remove(@Param('id') id: string, @GetUser() user: ResponseUserDbDto) {
     return this.userDetailService.remove(id, user);
   }

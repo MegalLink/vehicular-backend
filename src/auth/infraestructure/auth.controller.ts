@@ -136,13 +136,13 @@ export class AuthController {
   }
 
   @Get('users')
-  @Auth(ValidRoles.admin, ValidRoles.manager)
+  @Auth(ValidRoles.admin, ValidRoles.employee)
   getUsers(@Query() queryDto: QueryUserDto) {
     return this.authService.getAllUsers(queryDto);
   }
 
   @Patch('user/:searchParam')
-  @Auth(ValidRoles.admin, ValidRoles.manager)
+  @Auth(ValidRoles.admin, ValidRoles.employee)
   updateUserState(
     @Param('searchParam') searchParam: string,
     @GetUser() user: ResponseUserDbDto,
