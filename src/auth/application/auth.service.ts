@@ -184,12 +184,6 @@ export class AuthService {
       throw new UnauthorizedException('No puedes actualizar tu propio usuario');
     }
 
-    if (!user.roles.includes(ValidRoles.admin)) {
-      throw new UnauthorizedException(
-        'Solo un administrador puede actualizar usuarios',
-      );
-    }
-
     if (userUpdate.isActive !== undefined) {
       const userToUpdate = await this._userRepository.findOne({
         _id: userUpdateID,

@@ -216,7 +216,7 @@ export class AuthController {
   }
 
   @Patch('user/:searchParam')
-  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Update user state' })
   @ApiResponse({
     status: 200,
