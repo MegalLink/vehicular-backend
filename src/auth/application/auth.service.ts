@@ -180,13 +180,23 @@ export class AuthService {
     userUpdate: UpdateUserDto,
     userUpdateID: string,
   ): Promise<ResponseUserDbDto> {
-    const updatePayload = { ...userUpdate };
-    if (updatePayload.roles !== undefined) {
-      const isNewAdmin = updatePayload.roles.includes(ValidRoles.admin);
+    if (user._id === userUpdateID) {
+      throw new UnauthorizedException('No puedes actualizar tu propio usuario');
+    }
 
-      if (!user.roles.includes(ValidRoles.admin) && isNewAdmin) {
+    if (!user.roles.includes(ValidRoles.admin)) {
+      throw new UnauthorizedException(
+        'Solo un administrador puede actualizar usuarios',
+      );
+    }
+
+    if (userUpdate.isActive !== undefined) {
+      const userToUpdate = await this._userRepository.findOne({
+        _id: userUpdateID,
+      });
+      if (userToUpdate && !userToUpdate.roles.includes(ValidRoles.employee)) {
         throw new UnauthorizedException(
-          'No tienes permisos para asignar el rol de administrador',
+          'Solo puedes cambiar el estado de usuarios que sean empleados',
         );
       }
     }
