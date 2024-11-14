@@ -5,6 +5,8 @@ import { CreateBrandModelDto } from '../domain/dto/create-brand-model.dto';
 import { ResponseBrandModelDto } from '../domain/dto/response-brand-model.dto';
 import { CreateModelTypeDto } from '../domain/dto/create-model-type.dto';
 import { ResponseModelTypeDto } from '../domain/dto/response-model-type.dto';
+import { UpdateBrandModelDto } from '../domain/dto/update-brand-model.dto';
+import { UpdateModelTypeDto } from '../domain/dto/update-model-type.dto';
 
 export interface IBrandService {
   createBrand(createBrandDto: CreateBrandDto): Promise<ResponseBrandDto>;
@@ -21,4 +23,14 @@ export interface IBrandService {
     searchParam: string,
     updateBrandDto: UpdateBrandDto,
   ): Promise<ResponseBrandDto>;
+  updateBrandModel(
+    searchParam: string,
+    updateDto: UpdateBrandModelDto,
+  ): Promise<ResponseBrandModelDto>;
+  removeBrandModel(searchParam: string): Promise<ResponseBrandModelDto>;
+  updateModelType(
+    searchParam: string,
+    updateDto: UpdateModelTypeDto,
+  ): Promise<ResponseModelTypeDto>;
+  removeModelType(searchParam: string): Promise<ResponseModelTypeDto>;
 }

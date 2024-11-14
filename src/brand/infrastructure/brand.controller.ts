@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Patch,
+} from '@nestjs/common';
 import { BrandService } from '../application/brand.service';
 import { CreateBrandDto } from '../domain/dto/create-brand.dto';
 import { CreateBrandModelDto } from '../domain/dto/create-brand-model.dto';
@@ -110,5 +118,122 @@ export class BrandController {
   })
   findOne(@Param('id') id: string) {
     return this.brandService.findOneBrand(id);
+  }
+
+  @Patch(':id')
+  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiBody({ type: CreateBrandDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Update a brand',
+    type: ResponseBrandDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request response',
+    type: ErrorBadRequestDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found item _id',
+    type: ErrorNotFoundDto,
+  })
+  updateBrand(@Param('id') id: string, @Body() updateDto: CreateBrandDto) {
+    return this.brandService.updateBrand(id, updateDto);
+  }
+
+  @Delete(':id')
+  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiResponse({
+    status: 200,
+    description: 'Remove a brand',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found item _id',
+    type: ErrorNotFoundDto,
+  })
+  removeBrand(@Param('id') id: string) {
+    return this.brandService.removeBrand(id);
+  }
+
+  @Patch('model/:id')
+  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiBody({ type: CreateBrandModelDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Update a brand model',
+    type: ResponseBrandModelDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request response',
+    type: ErrorBadRequestDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found item _id',
+    type: ErrorNotFoundDto,
+  })
+  updateBrandModel(
+    @Param('id') id: string,
+    @Body() updateDto: CreateBrandModelDto,
+  ) {
+    return this.brandService.updateBrandModel(id, updateDto);
+  }
+
+  @Delete('model/:id')
+  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiResponse({
+    status: 200,
+    description: 'Remove a brand model',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found item _id',
+    type: ErrorNotFoundDto,
+  })
+  removeBrandModel(@Param('id') id: string) {
+    return this.brandService.removeBrandModel(id);
+  }
+
+  @Patch('model/type/:id')
+  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiBody({ type: CreateModelTypeDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Update a model type',
+    type: ResponseModelTypeDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request response',
+    type: ErrorBadRequestDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found item _id',
+    type: ErrorNotFoundDto,
+  })
+  updateModelType(
+    @Param('id') id: string,
+    @Body() updateDto: CreateModelTypeDto,
+  ) {
+    return this.brandService.updateModelType(id, updateDto);
+  }
+
+  @Delete('model/type/:id')
+  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiResponse({
+    status: 200,
+    description: 'Remove a model type',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found item _id',
+    type: ErrorNotFoundDto,
+  })
+  removeModelType(@Param('id') id: string) {
+    return this.brandService.removeModelType(id);
   }
 }

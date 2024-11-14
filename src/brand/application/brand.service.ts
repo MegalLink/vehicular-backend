@@ -14,6 +14,8 @@ import { BrandModelRepository } from '../domain/repository/brand-model.repositor
 import { IBrandModelRepository } from '../domain/repository/brand-model.repository.interface';
 import { IModelTypeRepository } from '../domain/repository/model-type.repository.interface';
 import { ModelTypeRepository } from '../domain/repository/model-type.repository';
+import { UpdateBrandModelDto } from '../domain/dto/update-brand-model.dto';
+import { UpdateModelTypeDto } from '../domain/dto/update-model-type.dto';
 
 @Injectable()
 export class BrandService implements IBrandService {
@@ -41,6 +43,7 @@ export class BrandService implements IBrandService {
       brandName: brand.name,
     });
   }
+
   async createBrandType(
     createDto: CreateModelTypeDto,
   ): Promise<ResponseModelTypeDto> {
@@ -54,10 +57,11 @@ export class BrandService implements IBrandService {
     }
 
     return this.typeRepository.create({
-      name: `${createDto.name}`,
+      name: `${model.name} ${createDto.name}`,
       modelName: model.name,
     });
   }
+
   findAllBrandModels(brandName: string): Promise<ResponseBrandModelDto[]> {
     const query: Record<string, any> = {};
     if (brandName) {
@@ -66,6 +70,7 @@ export class BrandService implements IBrandService {
 
     return this.modelRepository.findAll(query);
   }
+
   findAllModelTypes(model: string): Promise<ResponseModelTypeDto[]> {
     const query: Record<string, any> = {};
     if (model) {
@@ -103,7 +108,84 @@ export class BrandService implements IBrandService {
     return await this.brandRepository.update(searchParam, updateBrandDto);
   }
 
-  async removeBrand(searchParam: string): Promise<ResponseBrandDto> {
-    return await this.brandRepository.remove(searchParam);
+  async removeBrand(id: string): Promise<ResponseBrandDto> {
+    const brand = await this.brandRepository.findOne({ _id: id });
+    if (!brand) {
+      throw new NotFoundException(`Marca con id ${id} no encontrada`);
+    }
+
+    const brandModels = await this.modelRepository.findAll({
+      brandName: brand.name,
+    });
+
+    if (brandModels.length > 0) {
+      throw new NotFoundException(
+        `No se puede eliminar la marca ${brand.name} porque tiene modelos de marca asociados`,
+      );
+    }
+
+    return await this.brandRepository.remove(id);
+  }
+
+  async updateBrandModel(
+    id: string,
+    updateDto: UpdateBrandModelDto,
+  ): Promise<ResponseBrandModelDto> {
+    const brandModel = await this.modelRepository.findOne({
+      _id: id,
+    });
+    if (!brandModel) {
+      throw new NotFoundException(`Modelo de marca ${id} no encontrado`);
+    }
+
+    return await this.modelRepository.update(id, {
+      name: `${brandModel.brandName} ${updateDto.name}`,
+      brandName: brandModel.brandName,
+    });
+  }
+
+  async removeBrandModel(id: string): Promise<ResponseBrandModelDto> {
+    const brandModel = await this.modelRepository.findOne({
+      _id: id,
+    });
+
+    if (!brandModel) {
+      throw new NotFoundException(`Modelo de marca ${id} no encontrado`);
+    }
+
+    const modelTypes = await this.typeRepository.findAll({
+      modelName: brandModel.name,
+    });
+    if (modelTypes.length > 0) {
+      throw new NotFoundException(
+        `No se puede eliminar el modelo de marca ${brandModel.name} porque tiene tipos de modelo asociados`,
+      );
+    }
+
+    return await this.modelRepository.remove(id);
+  }
+
+  async updateModelType(
+    id: string,
+    updateDto: UpdateModelTypeDto,
+  ): Promise<ResponseModelTypeDto> {
+    const modelType = await this.typeRepository.findOne({ _id: id });
+    if (!modelType) {
+      throw new NotFoundException(`Tipo de modelo con id ${id} no encontrado`);
+    }
+
+    return await this.typeRepository.update(id, {
+      name: `${modelType.modelName} ${updateDto.name}`,
+      modelName: modelType.modelName,
+    });
+  }
+
+  async removeModelType(id: string): Promise<ResponseModelTypeDto> {
+    const modelType = await this.typeRepository.findOne({ _id: id });
+    if (!modelType) {
+      throw new NotFoundException(`Tipo de modelo con id ${id} no encontrado`);
+    }
+
+    return await this.typeRepository.remove(id);
   }
 }
