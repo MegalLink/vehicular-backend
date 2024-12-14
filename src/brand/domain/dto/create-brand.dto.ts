@@ -16,6 +16,5 @@ export class CreateBrandDto {
     example: 'https://example.com/image.jpg',
   })
   @IsString()
-  @IsUrl()
   image: string;
 }

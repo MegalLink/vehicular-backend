@@ -8,6 +8,7 @@ import {
 } from './domain/entities/spare_part.entity';
 import { SparePartRepository } from './domain/repository/spare_part.repository';
 import { AuthModule } from 'src/auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   controllers: [SparePartController],
@@ -17,6 +18,7 @@ import { AuthModule } from 'src/auth/auth.module';
       { name: SparePart.name, schema: SparePartSchema },
     ]),
     AuthModule,
+    ConfigModule,
   ],
   exports: [SparePartService],
 })

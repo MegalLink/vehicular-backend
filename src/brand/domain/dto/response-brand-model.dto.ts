@@ -8,10 +8,10 @@ export class ResponseBrandModelDto {
   _id: string;
 
   @ApiProperty({
-    description: 'The name of the brand',
-    example: 'BrandName',
+    description: 'The ID of the brand',
+    example: '507f1f77bcf86cd799439011',
   })
-  brandName: string;
+  brandId: string;
 
   @ApiProperty({
     description: 'The name of the brand model',

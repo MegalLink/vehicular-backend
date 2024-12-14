@@ -8,10 +8,10 @@ export class ResponseModelTypeDto {
   _id: string;
 
   @ApiProperty({
-    description: 'The name of the model',
-    example: 'ModelName',
+    description: 'The ID of the model',
+    example: '507f1f77bcf86cd799439011',
   })
-  modelName: string;
+  modelId: string;
 
   @ApiProperty({
     description: 'The name of the model type',

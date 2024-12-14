@@ -18,6 +18,7 @@ import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { ResponseUserDbDto } from 'src/auth/domain/dto/response-user-db.dto';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseSparePartDto } from '../domain/dto/response_spare_part.dto';
+import { GetAllResponseSparePartDto } from '../domain/dto/get_all_response_spare_part.dto';
 import { ErrorBadRequestDto, ErrorNotFoundDto } from '../../common/error.dto';
 
 @ApiTags('Spare Part')
@@ -48,8 +49,8 @@ export class SparePartController {
   @Get()
   @ApiResponse({
     status: 200,
-    description: 'Get all spare parts',
-    type: [ResponseSparePartDto],
+    description: 'Get all spare parts with pagination',
+    type: GetAllResponseSparePartDto,
   })
   async findAll(@Query() queryDto: QuerySparePartDto) {
     return this.sparePartService.findAll(queryDto);

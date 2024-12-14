@@ -24,6 +24,5 @@ export class CreateCategoryDto {
   })
   @IsOptional()
   @IsString()
-  @IsUrl()
   image: string;
 }

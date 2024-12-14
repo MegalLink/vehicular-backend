@@ -30,10 +30,25 @@ export abstract class BaseRepository<T extends Document, R>
     throw new InternalServerErrorException('A ocurrido un error inesperado');
   }
 
-  async findAll(query: object = {}): Promise<R[]> {
+  async findAll(query: object = {}, offset: number = 0, limit: number = 0): Promise<R[]> {
     try {
-      const entities = await this._model.find(query).exec();
+      let queryBuilder = this._model.find(query).skip(offset);
+      
+      if (limit !== 0) {
+        queryBuilder = queryBuilder.limit(limit);
+      }
+
+      const entities = await queryBuilder.exec();
       return entities.map((entity) => this.transform(entity));
+    } catch (error) {
+      this._handleException(error);
+    }
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
+  }
+
+  async count(query: object = {}): Promise<number> {
+    try {
+      return await this._model.countDocuments(query).exec();
     } catch (error) {
       this._handleException(error);
     }
@@ -77,9 +92,18 @@ export abstract class BaseRepository<T extends Document, R>
 
   private _handleException(error: any) {
     if (error.code === 11000) {
-      throw new BadRequestException(
-        `${this.entityName} ya existe en la base de datos ${JSON.stringify(error.keyValue)}`,
-      );
+      const keyValue = error.keyValue;
+      if (Object.keys(keyValue).length > 1) {
+        // Si hay múltiples campos en el error de duplicado
+        throw new BadRequestException(
+          `La combinación de campos ${Object.keys(keyValue).join(', ')} ya existe en ${this.entityName}`,
+        );
+      } else {
+        // Si solo hay un campo duplicado
+        throw new BadRequestException(
+          `El campo ${Object.keys(keyValue)[0]} ya existe en ${this.entityName}`,
+        );
+      }
     }
 
     throw error;

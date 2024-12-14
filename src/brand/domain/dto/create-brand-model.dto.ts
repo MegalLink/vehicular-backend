@@ -1,4 +1,4 @@
-import { IsString, MinLength } from 'class-validator';
+import { IsMongoId, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateBrandModelDto {
@@ -12,11 +12,11 @@ export class CreateBrandModelDto {
   name: string;
 
   @ApiProperty({
-    description: 'The name of the brand',
+    description: 'The ID of the brand',
     minLength: 1,
-    example: 'BrandName',
+    example: '507f1f77bcf86cd799439011',
   })
-  @IsString()
+  @IsMongoId()
   @MinLength(1)
-  brandName: string;
+  brandId: string;
 }

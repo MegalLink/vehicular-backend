@@ -24,7 +24,7 @@ export class ModelTypeRepository
     return {
       _id: (entity._id as ObjectId).toString(),
       name: entity.name,
-      modelName: entity.modelName,
+      modelId: entity.modelId,
     };
   }
 }

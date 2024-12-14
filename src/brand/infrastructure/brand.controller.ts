@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { BrandService } from '../application/brand.service';
 import { CreateBrandDto } from '../domain/dto/create-brand.dto';
@@ -13,11 +14,14 @@ import { CreateBrandModelDto } from '../domain/dto/create-brand-model.dto';
 import { CreateModelTypeDto } from '../domain/dto/create-model-type.dto';
 import { Auth } from '../../auth/decorators/auth.decorator';
 import { ValidRoles } from '../../auth/decorators/role-protect.decorator';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorBadRequestDto, ErrorNotFoundDto } from '../../common/error.dto';
 import { ResponseModelTypeDto } from '../domain/dto/response-model-type.dto';
 import { ResponseBrandDto } from '../domain/dto/response-brand.dto';
 import { ResponseBrandModelDto } from '../domain/dto/response-brand-model.dto';
+import { UpdateBrandDto } from '../domain/dto/update-brand.dto';
+import { UpdateBrandModelDto } from '../domain/dto/update-brand-model.dto';
+import { UpdateModelTypeDto } from '../domain/dto/update-model-type.dto';
 
 @ApiTags('Brand')
 @Controller('brand')
@@ -41,6 +45,79 @@ export class BrandController {
     return this.brandService.createBrand(createBrandDto);
   }
 
+  @Get()
+  @ApiResponse({
+    status: 200,
+    description: 'Get all brands',
+    type: [ResponseBrandDto],
+  })
+  findAllBrands() {
+    return this.brandService.findAllBrands();
+  }
+
+  @Get(':id')
+  @ApiParam({
+    name: 'id',
+    description: 'Brand ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Get a brand by ID',
+    type: ResponseBrandDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Brand not found',
+    type: ErrorNotFoundDto,
+  })
+  findOneBrand(@Param('id') id: string) {
+    return this.brandService.findOneBrand(id);
+  }
+
+  @Patch(':id')
+  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiParam({
+    name: 'id',
+    description: 'Brand ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: UpdateBrandDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Update a brand',
+    type: ResponseBrandDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Brand not found',
+    type: ErrorNotFoundDto,
+  })
+  updateBrand(@Param('id') id: string, @Body() updateBrandDto: UpdateBrandDto) {
+    return this.brandService.updateBrand(id, updateBrandDto);
+  }
+
+  @Delete(':id')
+  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiParam({
+    name: 'id',
+    description: 'Brand ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Delete a brand',
+    type: ResponseBrandDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Brand not found',
+    type: ErrorNotFoundDto,
+  })
+  removeBrand(@Param('id') id: string) {
+    return this.brandService.removeBrand(id);
+  }
+
   @Post('model')
   @Auth(ValidRoles.admin, ValidRoles.employee)
   @ApiBody({ type: CreateBrandModelDto })
@@ -50,12 +127,74 @@ export class BrandController {
     type: ResponseBrandModelDto,
   })
   @ApiResponse({
-    status: 400,
-    description: 'Bad request response',
-    type: ErrorBadRequestDto,
+    status: 404,
+    description: 'Brand not found',
+    type: ErrorNotFoundDto,
   })
-  createBrandModel(@Body() createDto: CreateBrandModelDto) {
-    return this.brandService.createBrandModel(createDto);
+  createBrandModel(@Body() createBrandModelDto: CreateBrandModelDto) {
+    return this.brandService.createBrandModel(createBrandModelDto);
+  }
+
+  @Get('model/all')
+  @ApiQuery({
+    name: 'brandId',
+    required: false,
+    description: 'Filter models by brand ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Get all brand models',
+    type: [ResponseBrandModelDto],
+  })
+  findAllBrandModels(@Query('brandId') brandId?: string) {
+    return this.brandService.findAllBrandModels(brandId);
+  }
+
+  @Patch('model/:id')
+  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiParam({
+    name: 'id',
+    description: 'Brand Model ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: UpdateBrandModelDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Update a brand model',
+    type: ResponseBrandModelDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Brand model not found',
+    type: ErrorNotFoundDto,
+  })
+  updateBrandModel(
+    @Param('id') id: string,
+    @Body() updateBrandModelDto: UpdateBrandModelDto,
+  ) {
+    return this.brandService.updateBrandModel(id, updateBrandModelDto);
+  }
+
+  @Delete('model/:id')
+  @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiParam({
+    name: 'id',
+    description: 'Brand Model ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Delete a brand model',
+    type: ResponseBrandModelDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Brand model not found',
+    type: ErrorNotFoundDto,
+  })
+  removeBrandModel(@Param('id') id: string) {
+    return this.brandService.removeBrandModel(id);
   }
 
   @Post('model/type')
@@ -67,170 +206,70 @@ export class BrandController {
     type: ResponseModelTypeDto,
   })
   @ApiResponse({
-    status: 400,
-    description: 'Bad request response',
-    type: ErrorBadRequestDto,
+    status: 404,
+    description: 'Brand model not found',
+    type: ErrorNotFoundDto,
   })
-  createBrandModelType(@Body() createDto: CreateModelTypeDto) {
-    return this.brandService.createBrandType(createDto);
+  createModelType(@Body() createModelTypeDto: CreateModelTypeDto) {
+    return this.brandService.createBrandType(createModelTypeDto);
   }
 
-  @Get()
-  @ApiResponse({
-    status: 200,
-    description: 'Get all brands',
-    type: [ResponseBrandDto],
+  @Get('model/type/all')
+  @ApiQuery({
+    name: 'modelId',
+    required: false,
+    description: 'Filter types by model ID',
+    example: '507f1f77bcf86cd799439011',
   })
-  findAll() {
-    return this.brandService.findAllBrands();
-  }
-
-  @Get(':brand/model')
   @ApiResponse({
     status: 200,
-    description: 'Get all models for a brand',
-    type: [ResponseBrandModelDto],
-  })
-  findAllBrandModels(@Param('brand') brand: string) {
-    return this.brandService.findAllBrandModels(brand);
-  }
-
-  @Get('model/:model/type')
-  @ApiResponse({
-    status: 200,
-    description: 'Get all types for a model',
+    description: 'Get all model types',
     type: [ResponseModelTypeDto],
   })
-  findAllModelTypes(@Param('model') model: string) {
-    return this.brandService.findAllModelTypes(model);
-  }
-
-  @Get(':id')
-  @ApiResponse({
-    status: 200,
-    description: 'Get a brand by ID',
-    type: ResponseBrandDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not found item _id',
-    type: ErrorNotFoundDto,
-  })
-  findOne(@Param('id') id: string) {
-    return this.brandService.findOneBrand(id);
-  }
-
-  @Patch(':id')
-  @Auth(ValidRoles.admin, ValidRoles.employee)
-  @ApiBody({ type: CreateBrandDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Update a brand',
-    type: ResponseBrandDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request response',
-    type: ErrorBadRequestDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not found item _id',
-    type: ErrorNotFoundDto,
-  })
-  updateBrand(@Param('id') id: string, @Body() updateDto: CreateBrandDto) {
-    return this.brandService.updateBrand(id, updateDto);
-  }
-
-  @Delete(':id')
-  @Auth(ValidRoles.admin, ValidRoles.employee)
-  @ApiResponse({
-    status: 200,
-    description: 'Remove a brand',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not found item _id',
-    type: ErrorNotFoundDto,
-  })
-  removeBrand(@Param('id') id: string) {
-    return this.brandService.removeBrand(id);
-  }
-
-  @Patch('model/:id')
-  @Auth(ValidRoles.admin, ValidRoles.employee)
-  @ApiBody({ type: CreateBrandModelDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Update a brand model',
-    type: ResponseBrandModelDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request response',
-    type: ErrorBadRequestDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not found item _id',
-    type: ErrorNotFoundDto,
-  })
-  updateBrandModel(
-    @Param('id') id: string,
-    @Body() updateDto: CreateBrandModelDto,
-  ) {
-    return this.brandService.updateBrandModel(id, updateDto);
-  }
-
-  @Delete('model/:id')
-  @Auth(ValidRoles.admin, ValidRoles.employee)
-  @ApiResponse({
-    status: 200,
-    description: 'Remove a brand model',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not found item _id',
-    type: ErrorNotFoundDto,
-  })
-  removeBrandModel(@Param('id') id: string) {
-    return this.brandService.removeBrandModel(id);
+  findAllModelTypes(@Query('modelId') modelId?: string) {
+    return this.brandService.findAllModelTypes(modelId);
   }
 
   @Patch('model/type/:id')
   @Auth(ValidRoles.admin, ValidRoles.employee)
-  @ApiBody({ type: CreateModelTypeDto })
+  @ApiParam({
+    name: 'id',
+    description: 'Model Type ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: UpdateModelTypeDto })
   @ApiResponse({
     status: 200,
     description: 'Update a model type',
     type: ResponseModelTypeDto,
   })
   @ApiResponse({
-    status: 400,
-    description: 'Bad request response',
-    type: ErrorBadRequestDto,
-  })
-  @ApiResponse({
     status: 404,
-    description: 'Not found item _id',
+    description: 'Model type not found',
     type: ErrorNotFoundDto,
   })
   updateModelType(
     @Param('id') id: string,
-    @Body() updateDto: CreateModelTypeDto,
+    @Body() updateModelTypeDto: UpdateModelTypeDto,
   ) {
-    return this.brandService.updateModelType(id, updateDto);
+    return this.brandService.updateModelType(id, updateModelTypeDto);
   }
 
   @Delete('model/type/:id')
   @Auth(ValidRoles.admin, ValidRoles.employee)
+  @ApiParam({
+    name: 'id',
+    description: 'Model Type ID',
+    example: '507f1f77bcf86cd799439011',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Remove a model type',
+    description: 'Delete a model type',
+    type: ResponseModelTypeDto,
   })
   @ApiResponse({
     status: 404,
-    description: 'Not found item _id',
+    description: 'Model type not found',
     type: ErrorNotFoundDto,
   })
   removeModelType(@Param('id') id: string) {

@@ -1,5 +1,6 @@
 import { IsOptional, IsPositive, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class QuerySparePartDto {
   @IsOptional()
@@ -55,4 +56,20 @@ export class QuerySparePartDto {
   @IsString()
   @ApiPropertyOptional({ description: 'Search query', example: '' })
   search?: string;
+
+  @IsOptional()
+  @ApiPropertyOptional({ 
+    description: 'Number of items to skip',
+    example: 0,
+    default: 0 
+  })
+  offset?: number = 0;
+
+  @IsOptional()
+  @ApiPropertyOptional({ 
+    description: 'Number of items to return',
+    example: 20,
+    default: 20 
+  })
+  limit?: number = 20;
 }
