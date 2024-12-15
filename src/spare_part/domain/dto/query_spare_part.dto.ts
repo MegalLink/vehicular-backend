@@ -16,27 +16,6 @@ export class QuerySparePartDto {
   minStock: number;
 
   @IsOptional()
-  @IsPositive()
-  @ApiPropertyOptional({ description: 'Maximum stock level', example: '' })
-  maxStock: number;
-
-  @IsOptional()
-  @IsPositive()
-  @ApiPropertyOptional({
-    description: 'Minimum price of the spare part',
-    example: '',
-  })
-  minPrice: number;
-
-  @IsOptional()
-  @IsPositive()
-  @ApiPropertyOptional({
-    description: 'Maximum price of the spare part',
-    example: '',
-  })
-  maxPrice: number;
-
-  @IsOptional()
   @ApiPropertyOptional({ description: 'Brand of the spare part', example: '' })
   brand: string;
 

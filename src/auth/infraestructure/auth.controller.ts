@@ -129,6 +129,7 @@ export class AuthController {
   }
 
   @Post('change-password')
+  @Auth()
   @ApiOperation({ summary: 'Change user password' })
   @ApiBody({ type: ChangePasswordDto })
   @ApiResponse({

@@ -98,8 +98,14 @@ export class AuthService {
       isEmailConfirmed: true,
     });
 
+    console.log("LOGIN User", user)
+
     if (!user) {
       throw new UnauthorizedException('Credenciales no validas');
+    }
+
+    if(!user.password){
+      throw new UnauthorizedException('Esta cuenta esta registrada con google');
     }
 
     if (!compareSync(password, user.password)) {
@@ -211,6 +217,10 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales no validas');
     }
 
+    if (!user.password) {
+      throw new UnauthorizedException('Esta cuenta esta registrada con google');
+    }
+
     user.confirmationToken = this._getJWT({
       email: email,
       userName: user.userName,
@@ -240,6 +250,10 @@ export class AuthService {
 
     if (!compareSync(changePasswordDto.password, user.password)) {
       throw new UnauthorizedException('Contraseña invalida');
+    }
+
+    if (compareSync(changePasswordDto.newPassword, user.password)) {
+      throw new BadRequestException('La nueva contraseña no puede ser igual a la actual');
     }
 
     user.password = hashSync(changePasswordDto.newPassword, saltRounds);
