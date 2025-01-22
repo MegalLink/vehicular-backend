@@ -21,6 +21,7 @@ export const EnvConfiguration = () => ({
   stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
   stripe_success_url: process.env.STRIPE_SUCCESS_URL,
   stripe_cancel_url: process.env.STRIPE_CANCEL_URL,
+  allowed_domains:process.env.ALLOWED_DOMAINS
 });
 
 export enum EnvironmentConstants {
@@ -44,4 +45,5 @@ export enum EnvironmentConstants {
   front_url_redirect_login = 'front_url_redirect_login',
   stripe_secret_key = 'stripe_secret_key',
   stripe_webhook_secret = 'stripe_webhook_secret',
+  allowed_domains = 'allowed_domains',
 }

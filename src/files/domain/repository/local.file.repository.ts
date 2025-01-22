@@ -35,8 +35,6 @@ export class LocalFilesRepository implements IGenericFileRepository {
       `static/${folderOutputPath}/`,
     );
     const filePath: string = join(localDirectory, fileName);
-    console.log('filePath', filePath);
-    console.log('fileName', fileName);
 
     // Ensure folder exists and save the file
     return new Promise((resolve, reject) => {

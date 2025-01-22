@@ -171,14 +171,12 @@ export class BrandService implements IBrandService {
   async createBrandType(
     createDto: CreateModelTypeDto,
   ): Promise<ResponseModelTypeDto> {
-    console.log("CREATE",createDto)
     const model = await this.modelRepository.findOne({
       _id: createDto.modelId,
     });
     if (!model) {
       throw new NotFoundException(`Modelo con id ${createDto.modelId} no encontrado`);
     }
-    console.log("HERE")
 
     return this.typeRepository.create({
       name: createDto.name,

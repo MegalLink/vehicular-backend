@@ -23,7 +23,6 @@ export class StripePaymentDto {
     example: 'https://example.com/payment/success',
   })
   @IsNotEmpty({ message: 'El campo successURL no puede estar vacío' })
-  @IsUrl({}, { message: 'El campo successURL debe ser una URL válida' })
   successURL: string;
 
   @ApiProperty({
@@ -31,12 +30,11 @@ export class StripePaymentDto {
     example: 'https://example.com/payment/cancel',
   })
   @IsNotEmpty({ message: 'El campo cancelURL no puede estar vacío' })
-  @IsUrl({}, { message: 'El campo cancelURL debe ser una URL válida' })
   cancelURL: string;
 
   @ApiProperty({
     description: 'Amount of tax included in the payment',
-    example: 15.75,
+    example: 0.15,
   })
   @IsNumber({}, { message: 'El campo tax debe ser un número' })
   @Min(0.001, { message: 'El campo tax debe ser mayor que 0' })

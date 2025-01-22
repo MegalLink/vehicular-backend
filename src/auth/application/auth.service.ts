@@ -98,8 +98,6 @@ export class AuthService {
       isEmailConfirmed: true,
     });
 
-    console.log("LOGIN User", user)
-
     if (!user) {
       throw new UnauthorizedException('Credenciales no validas');
     }
@@ -281,10 +279,11 @@ export class AuthService {
     return this._createAuthResponse(create_user);
   }
 
-  private _createAuthResponse(user: ResponseUserDbDto): SignInResponseDto {
+  private _createAuthResponse(user: ResponseUserDbDto): SignInResponseDto { 
     return {
       email: user.email,
       roles: user.roles,
+      userName: user.userName,
       token: this._getJWT({
         email: user.email,
         userName: user.userName,

@@ -19,4 +19,5 @@ export const EnvValidationSchema = joi.object({
   GOOGLE_REDIRECT_URL: joi.required(),
   STRIPE_SECRET_KEY: joi.required(),
   STRIPE_WEBHOOK_SECRET: joi.required(),
+  ALLOWED_DOMAINS: joi.required(),
 });

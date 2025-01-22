@@ -31,7 +31,7 @@ export class FilesController {
   @UseInterceptors(
     FileInterceptor('file', {
       fileFilter,
-      limits: { fileSize: 300000 },
+      limits: { fileSize: 5242880 }, // 5MB
       storage: diskStorage({
         destination: './static/images',
         filename: fileNamer,

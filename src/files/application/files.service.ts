@@ -31,7 +31,6 @@ export class FilesService implements IFilesService {
   }
 
   getStaticFile(fileName: string): string {
-    console.log('FileName', fileName);
     const fileExtension = fileName.split('.').pop();
     const imageFormatsArray: string[] = Object.values(ImageFileExtensionEnum);
     let fileExtensionFolder: string = '';

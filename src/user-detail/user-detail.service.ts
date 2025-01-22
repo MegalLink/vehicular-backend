@@ -48,12 +48,11 @@ export class UserDetailService implements IUserDetailService {
     createDto: CreateUserDetailDto,
     user: ResponseUserDbDto,
   ): Promise<ResponseUserDetailDbDto> {
-    console.log('Create User Detail', createDto);
     const createDetail = {
       ...createDto,
       userID: user._id,
     };
-    console.log('Create User Detail before', createDetail);
+    
     return await this.userDetailRepository.create(createDetail);
   }
 

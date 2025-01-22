@@ -240,7 +240,6 @@ export class OrderService {
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
-    console.log('EVENT', event);
 
     switch (event.type) {
       case 'checkout.session.completed':
@@ -251,7 +250,6 @@ export class OrderService {
         const paymentStatus: string = session.payment_status.toString();
         const paymentID: string | undefined =
           session.payment_intent?.toString();
-        console.log('OrderID: ', orderID, 'PaymentStatus: ', paymentStatus);
         const order = await this.orderRepository.findOne({ orderID: orderID });
         if (!order) {
           throw new NotFoundException(`Orden con id ${orderID} no encontrada`);
@@ -313,7 +311,7 @@ export class OrderService {
 
       totalPriceWithTax += roundToTwoDecimals(priceWithTax * item.quantity);
       const unit_amount = Math.max(Math.round(priceWithTax * 100), 50); // Ensure a minimum of $0.50 USD
-      console.log('UNIT AMOUNT', unit_amount);
+  
       return {
         price_data: {
           currency: 'usd',

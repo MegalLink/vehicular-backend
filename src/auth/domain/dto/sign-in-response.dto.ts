@@ -20,6 +20,12 @@ export class SignInResponseDto {
   token: string;
 
   @ApiProperty({
+    description: 'The username of the user',
+    example: 'username123',
+  })
+  userName: string;
+
+  @ApiProperty({
     description: 'The unique identifier of the user',
     example: '60d0fe4f5311236168a109cd',
   })

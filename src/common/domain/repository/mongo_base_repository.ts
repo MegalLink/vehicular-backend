@@ -84,7 +84,6 @@ export abstract class BaseRepository<T extends Document, R>
       this._handleNotfound(entity, searchParam);
       return this.transform(entity!);
     } catch (error) {
-      console.log('Remove error', error);
       this._handleException(error);
     }
     throw new InternalServerErrorException('A ocurrido un error inesperado');
