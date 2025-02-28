@@ -1,5 +1,14 @@
 import { ResponseFileDto } from 'src/files/domain/dto/reponse_file.dto';
+import * as Buffer from 'node:buffer';
 
-export interface IGeneriFileRepository {
-  uploadImage(filePath: string): Promise<ResponseFileDto>;
+export interface IGenericFileRepository {
+  uploadFile(
+    filePath: string,
+    folderOutputPath: string,
+  ): Promise<ResponseFileDto>;
+
+  uploadBufferFile(
+    buffer: Buffer,
+    folderOutputPath: string,
+  ): Promise<ResponseFileDto>;
 }

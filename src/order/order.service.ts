@@ -19,16 +19,39 @@ import { UserDetailService } from '../user-detail/user-detail.service';
 import { ResponseUserDetailDbDto } from '../user-detail/dto/response-user-detail-response-db.dto';
 import { FindOrderQueryDto } from './dto/find-order-query.dto';
 import { ValidRoles } from '../auth/decorators/role-protect.decorator';
-import { OrderStatus } from './enum/order.enum';
+import { OrderStatus, PaymentStatus } from './enum/order.enum';
+import { StripePaymentDto } from './dto/stripe-payment.dto';
+import { ConfigService } from '@nestjs/config';
+import { EnvironmentConstants } from '../config/env.config';
+import Stripe from 'stripe';
+import {
+  EmailRepository,
+  EmailRepositoryData,
+} from '../notification/domain/repository/email.repository';
+import { IPdfRepository } from '../common/domain/repository/pdf-repository.interface';
+import { FileRepository } from '../files/domain/repository/file.repository';
+import { PdfRepository } from '../common/domain/repository/pdf-repository';
 
 @Injectable()
 export class OrderService {
+  private _stripe: Stripe;
+
   constructor(
     @Inject(OrderRepository)
     private readonly orderRepository: IOrderRepository,
     private readonly sparePartService: SparePartService,
     private readonly userDetailService: UserDetailService,
-  ) {}
+    private readonly _configService: ConfigService,
+    private readonly _emailRepository: EmailRepository,
+    @Inject(PdfRepository)
+    private readonly _pdfRepository: IPdfRepository,
+    private readonly _fileRepository: FileRepository,
+  ) {
+    this._stripe = new Stripe(
+      this._configService.get(EnvironmentConstants.stripe_secret_key)!,
+      { apiVersion: '2024-06-20' },
+    );
+  }
 
   async create(
     createDto: CreateOrderDto,
@@ -66,13 +89,6 @@ export class OrderService {
       totalPrice += sparePart.price * item.quantity;
     }
 
-    for (const item of orderItems) {
-      const sparePart = await this.sparePartService.findOne(item.code);
-      await this.sparePartService.update(sparePart._id, {
-        stock: sparePart.stock - item.quantity,
-      });
-    }
-
     const orderID = this._generateOrderID();
 
     const userDetail: ResponseUserDetailDbDto =
@@ -82,7 +98,6 @@ export class OrderService {
         `Detalles de usuario con id ${createOrder.userDetailID} no encontrados`,
       );
     }
-    console.log('User detail', userDetail);
 
     const newOrder: CreateOrderDBDto = {
       orderID,
@@ -156,7 +171,7 @@ export class OrderService {
     if (
       order.status !== OrderStatus.CANCELLED.toString() &&
       !user.roles.includes(ValidRoles.admin) &&
-      !user.roles.includes(ValidRoles.manager)
+      !user.roles.includes(ValidRoles.employee)
     ) {
       throw new BadRequestException(
         'No tienes permiso para realizar esta operación',
@@ -172,6 +187,15 @@ export class OrderService {
         const sparePart = await this.sparePartService.findOne(item.code);
         await this.sparePartService.update(sparePart._id, {
           stock: sparePart.stock + item.quantity,
+        });
+      }
+    }
+
+    if (updateDto.paymentStatus === PaymentStatus.PAID) {
+      for (const item of order.items) {
+        const sparePart = await this.sparePartService.findOne(item.code);
+        await this.sparePartService.update(sparePart._id, {
+          stock: sparePart.stock - item.quantity,
         });
       }
     }
@@ -200,8 +224,131 @@ export class OrderService {
     return await this.orderRepository.remove(searchParam);
   }
 
+  async stripeWebhook(body: Buffer, signature: string) {
+    const endpointSecret = this._configService.get<string>(
+      EnvironmentConstants.stripe_webhook_secret,
+    );
+
+    let event: Stripe.Event;
+
+    try {
+      event = this._stripe.webhooks.constructEvent(
+        body,
+        signature,
+        endpointSecret!,
+      );
+    } catch (err) {
+      throw new BadRequestException(`Webhook Error: ${err.message}`);
+    }
+
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object as Stripe.Checkout.Session;
+        const orderID: string = session.metadata!.orderID!;
+        const userEmail: string = session.metadata!.userEmail!;
+        const tax: string = session.metadata!.tax!;
+        const paymentStatus: string = session.payment_status.toString();
+        const paymentID: string | undefined =
+          session.payment_intent?.toString();
+        const order = await this.orderRepository.findOne({ orderID: orderID });
+        if (!order) {
+          throw new NotFoundException(`Orden con id ${orderID} no encontrada`);
+        }
+        await this.orderRepository.update(order._id, {
+          paymentStatus: paymentStatus,
+        });
+
+        for (const item of order.items) {
+          const sparePart = await this.sparePartService.findOne(item.code);
+          await this.sparePartService.update(sparePart._id, {
+            stock: sparePart.stock - item.quantity,
+          });
+        }
+        const invoicePDF: Buffer = await this._pdfRepository.generateInvoice(
+          order,
+          { tax: +tax, paymentWith: 'Stripe' },
+        );
+
+        const response = await this._fileRepository.uploadBufferFile(
+          invoicePDF,
+          'pdf',
+        );
+
+        const emailData: EmailRepositoryData = this._sendReceiptEmailData(
+          userEmail,
+          order.userDetail.firstName,
+          response.fileUrl,
+        );
+        await this._emailRepository.sendEmail(emailData);
+
+        break;
+      default:
+        return;
+    }
+  }
+
+  async stripePayment(
+    paymentInformation: StripePaymentDto,
+    user: ResponseUserDbDto,
+  ) {
+    const order: ResponseOrderDto = await this.findOne(
+      paymentInformation.orderID,
+      user,
+    );
+
+    if (order.paymentStatus === PaymentStatus.PAID) {
+      throw new BadRequestException('La orden ya ha sido pagada');
+    }
+
+    const roundToTwoDecimals = (num: number) => Math.round(num * 100) / 100;
+    // Calculate the total price with tax
+    let totalPriceWithTax = 0;
+
+    const lineItems = order.items.map((item) => {
+      const priceWithTax = roundToTwoDecimals(
+        item.price * paymentInformation.tax + item.price,
+      );
+
+      totalPriceWithTax += roundToTwoDecimals(priceWithTax * item.quantity);
+      const unit_amount = Math.max(Math.round(priceWithTax * 100), 50); // Ensure a minimum of $0.50 USD
+  
+      return {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: item.name,
+            description: item.description,
+          },
+          // Adjust unit_amount to be in cents (for Stripe)
+          unit_amount: unit_amount,
+        },
+        quantity: item.quantity,
+      };
+    });
+
+    if (totalPriceWithTax < 0.5) {
+      throw new BadRequestException(
+        'The order total must be at least $0.50 USD',
+      );
+    }
+
+    const session = await this._stripe.checkout.sessions.create({
+      line_items: lineItems,
+      mode: 'payment',
+      metadata: {
+        orderID: order.orderID,
+        userEmail: user.email,
+        tax: paymentInformation.tax,
+      },
+      success_url: paymentInformation.successURL,
+      cancel_url: paymentInformation.cancelURL,
+    });
+
+    return { url: session.url };
+  }
+
   private _generateOrderID(): string {
-    return uuidv4().slice(0, 10);
+    return uuidv4().slice(0, 13).replace('-', '');
   }
 
   private _transformToResponseOrderDto(
@@ -233,7 +380,7 @@ export class OrderService {
     if (
       orderDB.userID !== user._id &&
       !user.roles.includes(ValidRoles.admin) &&
-      !user.roles.includes(ValidRoles.manager)
+      !user.roles.includes(ValidRoles.employee)
     ) {
       throw new BadRequestException('No tienes permiso para ver esta orden');
     }
@@ -263,5 +410,30 @@ export class OrderService {
     }
 
     return query;
+  }
+
+  private _sendReceiptEmailData(
+    email: string,
+    username: string,
+    receiptURL: string,
+  ): EmailRepositoryData {
+    return {
+      to: [email],
+      subject: '¡Tu Recibo de Compra Está Listo!',
+      body: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <h2>¡Hola, ${username}!</h2>
+        <p>Gracias por tu compra. Nos complace informarte que tu recibo de compra está listo.</p>
+        <p>Aquí tienes el enlace para acceder a tu recibo:</p>
+        <a href="${receiptURL}" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Ver Recibo</a>
+        <br>
+        <p>Si el enlace no funciona, copia y pega el siguiente enlace en tu navegador:</p>
+        <p><a href="${receiptURL}" style="color: #007bff;">${receiptURL}</a></p>
+        <br>
+        <p>¡Esperamos que disfrutes de tu compra!</p>
+        <p>Saludos,<br>El equipo de soporte</p>
+      </div>
+    `,
+    };
   }
 }

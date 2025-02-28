@@ -9,6 +9,6 @@ export interface IOrderRepository {
   remove(searchParam: string): Promise<ResponseOrderDbDto>;
   update(
     searchParam: string,
-    updateSparePartDto: UpdateOrderDto,
+    updateDto: UpdateOrderDto,
   ): Promise<ResponseOrderDbDto>;
 }

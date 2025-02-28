@@ -5,15 +5,19 @@ import { ISparePartService } from './spare_part.service.interface';
 import { SparePartRepository } from '../domain/repository/spare_part.repository';
 import { ISparePartRepository } from '../domain/repository/spare_part.respository.interface';
 import { ResponseSparePartDto } from '../domain/dto/response_spare_part.dto';
+import { GetAllResponseSparePartDto } from '../domain/dto/get_all_response_spare_part.dto';
 import { isValidObjectId } from 'mongoose';
 import { QuerySparePartDto } from '../domain/dto/query_spare_part.dto';
 import { ResponseUserDbDto } from 'src/auth/domain/dto/response-user-db.dto';
+import { ConfigService } from '@nestjs/config';
+import { EnvironmentConstants } from 'src/config/env.config';
 
 @Injectable()
 export class SparePartService implements ISparePartService {
   constructor(
     @Inject(SparePartRepository)
     private readonly sparePartRepository: ISparePartRepository,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(
@@ -28,9 +32,32 @@ export class SparePartService implements ISparePartService {
     return await this.sparePartRepository.create(createSparePart);
   }
 
-  async findAll(queryDto: QuerySparePartDto): Promise<ResponseSparePartDto[]> {
+  async findAll(queryDto: QuerySparePartDto): Promise<GetAllResponseSparePartDto> {
     const query = this.buildQuery(queryDto);
-    return this.sparePartRepository.findAll(query);
+    const { offset = 0, limit = 0 } = queryDto;
+
+    const [total, results] = await Promise.all([
+      this.sparePartRepository.count(query),
+      this.sparePartRepository.findAll(query, offset, limit),
+    ]);
+
+    const baseUrl = this.configService.get<string>(EnvironmentConstants.rest_api_url);
+    const hasNext = offset + limit < total;
+    const hasPrevious = offset > 0;
+
+    const next = hasNext
+      ? `${baseUrl}/api/v1/spare-part?offset=${offset + limit}&limit=${limit}`
+      : null;
+    const previous = hasPrevious
+      ? `${baseUrl}/api/v1/spare-part?offset=${Math.max(0, offset - limit)}&limit=${limit}`
+      : null;
+
+    return {
+      count: total,
+      next,
+      previous,
+      results,
+    };
   }
 
   private buildQuery(filters: QuerySparePartDto): Record<string, any> {
@@ -41,15 +68,6 @@ export class SparePartService implements ISparePartService {
     }
     if (filters.minStock !== undefined) {
       query.stock = { ...query.stock, $gte: filters.minStock };
-    }
-    if (filters.maxStock !== undefined) {
-      query.stock = { ...query.stock, $lte: filters.maxStock };
-    }
-    if (filters.minPrice !== undefined) {
-      query.price = { ...query.price, $gte: filters.minPrice };
-    }
-    if (filters.maxPrice !== undefined) {
-      query.price = { ...query.price, $lte: filters.maxPrice };
     }
     if (filters.brand) {
       query.brand = filters.brand;

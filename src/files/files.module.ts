@@ -8,5 +8,6 @@ import { FileRepository } from './domain/repository/file.repository';
   controllers: [FilesController],
   imports: [ConfigModule],
   providers: [FilesService, FileRepository],
+  exports: [FilesService, FileRepository],
 })
 export class FilesModule {}

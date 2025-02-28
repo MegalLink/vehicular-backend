@@ -27,17 +27,32 @@ export abstract class BaseRepository<T extends Document, R>
     } catch (error) {
       this._handleException(error);
     }
-    throw new BadRequestException('A ocurrido un error inesperado');
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
   }
 
-  async findAll(query: object = {}): Promise<R[]> {
+  async findAll(query: object = {}, offset: number = 0, limit: number = 0): Promise<R[]> {
     try {
-      const entities = await this._model.find(query).exec();
+      let queryBuilder = this._model.find(query).skip(offset);
+      
+      if (limit !== 0) {
+        queryBuilder = queryBuilder.limit(limit);
+      }
+
+      const entities = await queryBuilder.exec();
       return entities.map((entity) => this.transform(entity));
     } catch (error) {
       this._handleException(error);
     }
-    throw new BadRequestException('A ocurrido un error inesperado');
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
+  }
+
+  async count(query: object = {}): Promise<number> {
+    try {
+      return await this._model.countDocuments(query).exec();
+    } catch (error) {
+      this._handleException(error);
+    }
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
   }
 
   async findOne(searchParam: object): Promise<R | undefined> {
@@ -60,9 +75,7 @@ export abstract class BaseRepository<T extends Document, R>
     } catch (error) {
       this._handleException(error);
     }
-    throw new NotFoundException(
-      `${this.entityName} con id ${searchParam} no encontrado`,
-    );
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
   }
 
   async remove(searchParam: string): Promise<R> {
@@ -73,20 +86,26 @@ export abstract class BaseRepository<T extends Document, R>
     } catch (error) {
       this._handleException(error);
     }
-    throw new NotFoundException(
-      `${this.entityName} con id ${searchParam} no encontrado`,
-    );
+    throw new InternalServerErrorException('A ocurrido un error inesperado');
   }
 
   private _handleException(error: any) {
     if (error.code === 11000) {
-      throw new BadRequestException(
-        `${this.entityName} ya existe en la base de datos ${JSON.stringify(error.keyValue)}`,
-      );
+      const keyValue = error.keyValue;
+      if (Object.keys(keyValue).length > 1) {
+        // Si hay múltiples campos en el error de duplicado
+        throw new BadRequestException(
+          `La combinación de campos ${Object.keys(keyValue).join(', ')} ya existe en ${this.entityName}`,
+        );
+      } else {
+        // Si solo hay un campo duplicado
+        throw new BadRequestException(
+          `El campo ${Object.keys(keyValue)[0]} ya existe en ${this.entityName}`,
+        );
+      }
     }
 
-    console.error('Error:', error);
-    throw new InternalServerErrorException('A ocurrido un error inesperado');
+    throw error;
   }
 
   private _handleNotfound(
@@ -94,9 +113,14 @@ export abstract class BaseRepository<T extends Document, R>
     searchParam?: string | object,
   ) {
     if (!entity) {
+      searchParam =
+        typeof searchParam === 'object'
+          ? JSON.stringify(searchParam)
+          : JSON.stringify({ _id: searchParam });
       const message = searchParam
-        ? `${this.entityName} con ${JSON.stringify(searchParam)} no encontrado`
+        ? `${this.entityName} con ${searchParam} no encontrado`
         : `No se puedo crear ${this.entityName}`;
+
       throw new NotFoundException(message);
     }
   }

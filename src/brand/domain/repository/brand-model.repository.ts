@@ -23,7 +23,7 @@ export class BrandModelRepository
     return {
       _id: (entity._id as ObjectId).toString(),
       name: entity.name,
-      brandName: entity.brandName,
+      brandId: entity.brandId,
     };
   }
 }
