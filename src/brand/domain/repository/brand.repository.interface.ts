@@ -1,6 +1,6 @@
-import { CreateBrandDto } from '../dto/create-brand.dto';
-import { ResponseBrandDto } from '../dto/response-brand.dto';
-import { UpdateBrandDto } from '../dto/update-brand.dto';
+import { CreateBrandDto } from '../../application/dto/create-brand.dto';
+import { ResponseBrandDto } from '../../application/dto/response-brand.dto';
+import { UpdateBrandDto } from '../../application/dto/update-brand.dto';
 
 export interface IBrandRepository {
   create(createBrandDto: CreateBrandDto): Promise<ResponseBrandDto>;

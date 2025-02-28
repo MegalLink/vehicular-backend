@@ -16,4 +16,7 @@ export class BrandModel extends Document {
 export const BrandModelSchema = SchemaFactory.createForClass(BrandModel);
 
 // Crear un índice compuesto para que el nombre sea único solo dentro de una marca
-BrandModelSchema.index({ name: 1, brandId: 1 }, { unique: true, background: true });
+BrandModelSchema.index(
+  { name: 1, brandId: 1 },
+  { unique: true, background: true },
+);

@@ -4,32 +4,30 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { SignUpUserDto } from '../domain/dto/sign-up.dto';
+import { SignUpUserDto } from '../application/dto/sign-up.dto';
 import { hashSync, compareSync } from 'bcrypt';
 import { IUserRepository } from '../domain/repository/auth.repository.interface';
-import { UserRepository } from '../domain/repository/auth.repository';
-import { SignInUserDto } from '../domain/dto/sign-in.dto';
-import { JwtPayload } from './jwt-payload.interface';
+import { UserRepository } from '../infraestructure/persistence/auth.repository';
+import { SignInUserDto } from '../application/dto/sign-in.dto';
+import { JwtPayload } from '../domain/interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
-import { SignInResponseDto } from '../domain/dto/sign-in-response.dto';
-import { ResponseUserDbDto } from '../domain/dto/response-user-db.dto';
+import { SignInResponseDto } from '../application/dto/sign-in-response.dto';
+import { ResponseUserDbDto } from '../application/dto/response-user-db.dto';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentConstants } from '../../config/env.config';
 import { IEmailRepository } from '../../notification/domain/repository/email.repository.interface';
-import {
-  EmailRepository,
-  EmailRepositoryData,
-} from '../../notification/domain/repository/email.repository';
-import { ResetPasswordDto } from '../domain/dto/reset-password.dto';
+import { ResetPasswordDto } from '../application/dto/reset-password.dto';
 import * as crypto from 'crypto';
-import { ChangePasswordDto } from '../domain/dto/change-password.dto';
-import { QueryUserDto } from '../domain/dto/query-user.dto';
-import { UpdateUserDto } from '../domain/dto/update-user.dto';
-import { ValidRoles } from '../decorators/role-protect.decorator';
-import { GoogleUserDto } from '../domain/dto/google-user.dto';
-import { SignUpResponseDto } from '../domain/dto/sign-up-response.dto';
-import { ResetPasswordResponseDto } from '../domain/dto/reset-password-response.dto';
-import { ChangePasswordResponseDto } from '../domain/dto/change-password-response.dto';
+import { ChangePasswordDto } from '../application/dto/change-password.dto';
+import { QueryUserDto } from '../application/dto/query-user.dto';
+import { UpdateUserDto } from '../application/dto/update-user.dto';
+import { ValidRoles } from '../infraestructure/decorators/role-protect.decorator';
+import { GoogleUserDto } from '../application/dto/google-user.dto';
+import { SignUpResponseDto } from '../application/dto/sign-up-response.dto';
+import { ResetPasswordResponseDto } from '../application/dto/reset-password-response.dto';
+import { ChangePasswordResponseDto } from '../application/dto/change-password-response.dto';
+import { EmailRepository } from '../../notification/infraestructure/adapters/email.repository';
+import { EmailRepositoryData } from '../../notification/domain/interfaces/email-data.interface';
 
 const saltRounds = 10;
 const TokenConfirmed = 'TOKEN_CONFIRMED';
@@ -102,7 +100,7 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales no validas');
     }
 
-    if(!user.password){
+    if (!user.password) {
       throw new UnauthorizedException('Esta cuenta esta registrada con google');
     }
 
@@ -251,7 +249,9 @@ export class AuthService {
     }
 
     if (compareSync(changePasswordDto.newPassword, user.password)) {
-      throw new BadRequestException('La nueva contraseña no puede ser igual a la actual');
+      throw new BadRequestException(
+        'La nueva contraseña no puede ser igual a la actual',
+      );
     }
 
     user.password = hashSync(changePasswordDto.newPassword, saltRounds);
@@ -279,7 +279,7 @@ export class AuthService {
     return this._createAuthResponse(create_user);
   }
 
-  private _createAuthResponse(user: ResponseUserDbDto): SignInResponseDto { 
+  private _createAuthResponse(user: ResponseUserDbDto): SignInResponseDto {
     return {
       email: user.email,
       roles: user.roles,

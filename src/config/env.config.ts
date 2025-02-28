@@ -21,7 +21,7 @@ export const EnvConfiguration = () => ({
   stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
   stripe_success_url: process.env.STRIPE_SUCCESS_URL,
   stripe_cancel_url: process.env.STRIPE_CANCEL_URL,
-  allowed_domains:process.env.ALLOWED_DOMAINS
+  allowed_domains: process.env.ALLOWED_DOMAINS,
 });
 
 export enum EnvironmentConstants {

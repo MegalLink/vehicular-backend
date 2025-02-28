@@ -29,10 +29,6 @@ export class SparePart extends Document {
   @Prop({})
   modelTypeYear: string;
   @Prop({})
-  userID: string;
-  @Prop({})
-  createdBy: string;
-  @Prop({})
   createdAt: Date;
   @Prop({})
   updatedAt: Date;

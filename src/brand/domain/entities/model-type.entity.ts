@@ -4,12 +4,12 @@ import { Document } from 'mongoose';
 @Schema()
 export class BrandModelType extends Document {
   @Prop({
-    index: true
+    index: true,
   })
   name: string;
 
   @Prop({
-    index: true
+    index: true,
   })
   modelId: string;
 }

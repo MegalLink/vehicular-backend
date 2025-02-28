@@ -1,18 +1,24 @@
 import { Module } from '@nestjs/common';
 import { SparePartService } from './application/spare_part.service';
-import { SparePartController } from './infrastructure/spare_part.controller';
+import { SparePartController } from './infrastructure/controllers/spare_part.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   SparePart,
   SparePartSchema,
 } from './domain/entities/spare_part.entity';
-import { SparePartRepository } from './domain/repository/spare_part.repository';
+import { SparePartRepository } from './infrastructure/persistence/spare_part.repository';
 import { AuthModule } from 'src/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
   controllers: [SparePartController],
-  providers: [SparePartService, SparePartRepository],
+  providers: [
+    SparePartService,
+    {
+      provide: 'ISparePartRepository',
+      useClass: SparePartRepository,
+    },
+  ],
   imports: [
     MongooseModule.forFeature([
       { name: SparePart.name, schema: SparePartSchema },

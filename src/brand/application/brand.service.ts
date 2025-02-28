@@ -1,21 +1,23 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateBrandDto } from '../domain/dto/create-brand.dto';
-import { UpdateBrandDto } from '../domain/dto/update-brand.dto';
-import { IBrandService } from './brand.service.interface';
+import { CreateBrandDto } from './dto/create-brand.dto';
+import { UpdateBrandDto } from './dto/update-brand.dto';
+import { IBrandService } from '../domain/ports/brand.service.interface';
 import { IBrandRepository } from '../domain/repository/brand.repository.interface';
-import { BrandRepository } from '../domain/repository/brand.repository';
-import { ResponseBrandDto } from '../domain/dto/response-brand.dto';
+import { BrandRepository } from '../infrastructure/persistence/brand.repository';
+import { ResponseBrandDto } from './dto/response-brand.dto';
 import { isValidObjectId } from 'mongoose';
-import { CreateBrandModelDto } from '../domain/dto/create-brand-model.dto';
-import { CreateModelTypeDto } from '../domain/dto/create-model-type.dto';
-import { ResponseBrandModelDto } from '../domain/dto/response-brand-model.dto';
-import { ResponseModelTypeDto } from '../domain/dto/response-model-type.dto';
-import { BrandModelRepository } from '../domain/repository/brand-model.repository';
+import { CreateBrandModelDto } from './dto/create-brand-model.dto';
+import { CreateModelTypeDto } from './dto/create-model-type.dto';
+import { ResponseBrandModelDto } from './dto/response-brand-model.dto';
+import { ResponseModelTypeDto } from './dto/response-model-type.dto';
+import { BrandModelRepository } from '../infrastructure/persistence/brand-model.repository';
 import { IBrandModelRepository } from '../domain/repository/brand-model.repository.interface';
 import { IModelTypeRepository } from '../domain/repository/model-type.repository.interface';
-import { ModelTypeRepository } from '../domain/repository/model-type.repository';
-import { UpdateBrandModelDto } from '../domain/dto/update-brand-model.dto';
-import { UpdateModelTypeDto } from '../domain/dto/update-model-type.dto';
+import { ModelTypeRepository } from '../infrastructure/persistence/model-type.repository';
+import { UpdateBrandModelDto } from './dto/update-brand-model.dto';
+import { UpdateModelTypeDto } from './dto/update-model-type.dto';
+import { QueryBrandoModelDto } from './dto/query-brand-models.dto';
+import { QueryBrandoModelTypeDto } from './dto/query-brand-model-type.dto';
 
 @Injectable()
 export class BrandService implements IBrandService {
@@ -95,7 +97,9 @@ export class BrandService implements IBrandService {
       _id: createDto.brandId,
     });
     if (!brand) {
-      throw new NotFoundException(`Marca con id ${createDto.brandId} no encontrada`);
+      throw new NotFoundException(
+        `Marca con id ${createDto.brandId} no encontrada`,
+      );
     }
 
     return this.modelRepository.create({
@@ -104,19 +108,39 @@ export class BrandService implements IBrandService {
     });
   }
 
-  async findAllBrandModels(brandId?: string): Promise<ResponseBrandModelDto[]> {
-    const query: Record<string, any> = {};
-    if (brandId) {
-      if (!isValidObjectId(brandId)) {
-        throw new NotFoundException(`ID de marca ${brandId} no válido`);
-      }
-      const brand = await this.brandRepository.findOne({ _id: brandId });
+  async findAllBrandModels(
+    queryModel: QueryBrandoModelDto,
+  ): Promise<ResponseBrandModelDto[]> {
+    if (queryModel.brandName) {
+      const allBrands = await this.findAllBrands();
+      const brand = allBrands.find(
+        (brand: ResponseBrandDto) => brand.name === queryModel.brandName,
+      );
+
       if (!brand) {
-        throw new NotFoundException(`Marca con id ${brandId} no encontrada`);
+        return [];
       }
-      query.brandId = brandId;
+
+      return this.modelRepository.findAll({ brandId: brand._id });
     }
 
+    const query: Record<string, any> = {};
+    if (queryModel.brandId) {
+      if (!isValidObjectId(queryModel.brandId)) {
+        throw new NotFoundException(
+          `ID de marca ${queryModel.brandId} no válido`,
+        );
+      }
+      const brand = await this.brandRepository.findOne({
+        _id: queryModel.brandId,
+      });
+      if (!brand) {
+        throw new NotFoundException(
+          `Marca con id ${queryModel.brandId} no encontrada`,
+        );
+      }
+      query.brandId = queryModel.brandId;
+    }
     return this.modelRepository.findAll(query);
   }
 
@@ -134,9 +158,13 @@ export class BrandService implements IBrandService {
     }
 
     if (updateDto.brandId) {
-      const brand = await this.brandRepository.findOne({ _id: updateDto.brandId });
+      const brand = await this.brandRepository.findOne({
+        _id: updateDto.brandId,
+      });
       if (!brand) {
-        throw new NotFoundException(`Marca con id ${updateDto.brandId} no encontrada`);
+        throw new NotFoundException(
+          `Marca con id ${updateDto.brandId} no encontrada`,
+        );
       }
     }
 
@@ -175,7 +203,9 @@ export class BrandService implements IBrandService {
       _id: createDto.modelId,
     });
     if (!model) {
-      throw new NotFoundException(`Modelo con id ${createDto.modelId} no encontrado`);
+      throw new NotFoundException(
+        `Modelo con id ${createDto.modelId} no encontrado`,
+      );
     }
 
     return this.typeRepository.create({
@@ -184,9 +214,25 @@ export class BrandService implements IBrandService {
     });
   }
 
-  async findAllModelTypes(modelId?: string): Promise<ResponseModelTypeDto[]> {
+  async findAllModelTypes(
+    modelQuery: QueryBrandoModelTypeDto,
+  ): Promise<ResponseModelTypeDto[]> {
+    if (modelQuery.modelName) {
+      const allModels = await this.findAllBrandModels({});
+      const model = allModels.find(
+        (model: ResponseBrandModelDto) => model.name === modelQuery.modelName,
+      );
+
+      if (!model) {
+        return [];
+      }
+
+      return this.typeRepository.findAll({ modelId: model });
+    }
+
     const query: Record<string, any> = {};
-    if (modelId) {
+    if (modelQuery.modelId) {
+      const modelId = modelQuery.modelId;
       if (!isValidObjectId(modelId)) {
         throw new NotFoundException(`ID de modelo ${modelId} no válido`);
       }
@@ -214,9 +260,13 @@ export class BrandService implements IBrandService {
     }
 
     if (updateDto.modelId) {
-      const model = await this.modelRepository.findOne({ _id: updateDto.modelId });
+      const model = await this.modelRepository.findOne({
+        _id: updateDto.modelId,
+      });
       if (!model) {
-        throw new NotFoundException(`Modelo con id ${updateDto.modelId} no encontrado`);
+        throw new NotFoundException(
+          `Modelo con id ${updateDto.modelId} no encontrado`,
+        );
       }
     }
 
