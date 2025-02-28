@@ -27,6 +27,9 @@ import { QueryUserDto } from '../domain/dto/query-user.dto';
 import { UpdateUserDto } from '../domain/dto/update-user.dto';
 import { ValidRoles } from '../decorators/role-protect.decorator';
 import { GoogleUserDto } from '../domain/dto/google-user.dto';
+import { SignUpResponseDto } from '../domain/dto/sign-up-response.dto';
+import { ResetPasswordResponseDto } from '../domain/dto/reset-password-response.dto';
+import { ChangePasswordResponseDto } from '../domain/dto/change-password-response.dto';
 
 const saltRounds = 10;
 const TokenConfirmed = 'TOKEN_CONFIRMED';
@@ -42,7 +45,7 @@ export class AuthService {
     private readonly _configService: ConfigService,
   ) {}
 
-  async signUp(signUpDto: SignUpUserDto): Promise<object> {
+  async signUp(signUpDto: SignUpUserDto): Promise<SignUpResponseDto> {
     const token: string = this._getJWT({
       email: signUpDto.email,
       userName: signUpDto.userName,
@@ -97,6 +100,10 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException('Credenciales no validas');
+    }
+
+    if(!user.password){
+      throw new UnauthorizedException('Esta cuenta esta registrada con google');
     }
 
     if (!compareSync(password, user.password)) {
@@ -177,13 +184,17 @@ export class AuthService {
     userUpdate: UpdateUserDto,
     userUpdateID: string,
   ): Promise<ResponseUserDbDto> {
-    const updatePayload = { ...userUpdate };
-    if (updatePayload.roles !== undefined) {
-      const isNewAdmin = updatePayload.roles.includes(ValidRoles.admin);
+    if (user._id === userUpdateID) {
+      throw new UnauthorizedException('No puedes actualizar tu propio usuario');
+    }
 
-      if (!user.roles.includes(ValidRoles.admin) && isNewAdmin) {
+    if (userUpdate.isActive !== undefined) {
+      const userToUpdate = await this._userRepository.findOne({
+        _id: userUpdateID,
+      });
+      if (userToUpdate && !userToUpdate.roles.includes(ValidRoles.employee)) {
         throw new UnauthorizedException(
-          'No tienes permisos para asignar el rol de administrador',
+          'Solo puedes cambiar el estado de usuarios que sean empleados',
         );
       }
     }
@@ -191,7 +202,9 @@ export class AuthService {
     return await this._userRepository.update(userUpdateID, userUpdate);
   }
 
-  async resetPassword(input: ResetPasswordDto): Promise<object> {
+  async resetPassword(
+    input: ResetPasswordDto,
+  ): Promise<ResetPasswordResponseDto> {
     const email = input.email;
     const user = await this._userRepository.findOne({
       email: email,
@@ -200,6 +213,10 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException('Credenciales no validas');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException('Esta cuenta esta registrada con google');
     }
 
     user.confirmationToken = this._getJWT({
@@ -218,7 +235,9 @@ export class AuthService {
     };
   }
 
-  async changePassword(changePasswordDto: ChangePasswordDto): Promise<object> {
+  async changePassword(
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<ChangePasswordResponseDto> {
     const user = await this._userRepository.findOne({
       email: changePasswordDto.email,
     });
@@ -229,6 +248,10 @@ export class AuthService {
 
     if (!compareSync(changePasswordDto.password, user.password)) {
       throw new UnauthorizedException('Contraseña invalida');
+    }
+
+    if (compareSync(changePasswordDto.newPassword, user.password)) {
+      throw new BadRequestException('La nueva contraseña no puede ser igual a la actual');
     }
 
     user.password = hashSync(changePasswordDto.newPassword, saltRounds);
@@ -256,10 +279,11 @@ export class AuthService {
     return this._createAuthResponse(create_user);
   }
 
-  private _createAuthResponse(user: ResponseUserDbDto): SignInResponseDto {
+  private _createAuthResponse(user: ResponseUserDbDto): SignInResponseDto { 
     return {
       email: user.email,
       roles: user.roles,
+      userName: user.userName,
       token: this._getJWT({
         email: user.email,
         userName: user.userName,

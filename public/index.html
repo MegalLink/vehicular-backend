@@ -5,8 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API DOC</title>
     <link rel="stylesheet" href="./styles/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .not-found {
+            color: #e74c3c;
+            font-size: 2em;
+        }
+        .home-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .home-link:hover {
+            background-color: #2980b9;
+        }
+    </style>
 </head>
 <body>
-    <h1>Aqui sera de servir la documentacion</h1>
+<div class="container">
+    <!-- Not Found Message -->
+    <div class="not-found">
+        <h2>404 - Página No Encontrada</h2>
+        <p>La página que estás buscando no existe.</p>
+        <a href="/api/v1" class="home-link">Regresar a Inicio</a>
+    </div>
+</div>
 </body>
 </html>

@@ -8,13 +8,17 @@ import {
 } from 'class-validator';
 import { ValidRoles } from '../../decorators/role-protect.decorator';
 
+const validRolesUpdate = Object.values(ValidRoles).filter(
+  (role) => role !== ValidRoles.admin,
+);
+
 export class UpdateUserRequestDto {
   @IsArray({ message: 'Los roles deben ser un array' })
   @ArrayNotEmpty({ message: 'El array de roles no puede estar vacío' })
   @IsString({ each: true, message: 'Cada rol debe ser una cadena de texto' })
-  @IsIn(Object.values(ValidRoles), {
+  @IsIn(validRolesUpdate, {
     each: true,
-    message: `Cada rol debe ser uno de los siguientes valores: ${Object.values(ValidRoles)}`,
+    message: `Cada rol debe ser uno de los siguientes valores: ${validRolesUpdate}`,
   })
   roles: string[];
 

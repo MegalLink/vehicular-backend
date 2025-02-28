@@ -4,7 +4,7 @@ export const META_ROLES = 'roles';
 
 export enum ValidRoles {
   admin = 'admin',
-  manager = 'manager',
+  employee = 'employee',
   user = 'user',
 }
 

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { OrderStatus } from '../enum/order.enum';
+import { OrderStatus, PaymentStatus } from '../enum/order.enum';
 
 @Schema({ timestamps: true })
 export class Order extends Document {
@@ -39,7 +39,9 @@ export class Order extends Document {
   @Prop({ default: 0 })
   totalPrice: number;
   @Prop({
-    default: 'Not paid',
+    type: String,
+    enum: PaymentStatus,
+    default: PaymentStatus.NOT_PAID,
   })
   paymentStatus: string;
   @Prop({
