@@ -28,6 +28,7 @@ import { ResetPasswordResponseDto } from '../application/dto/reset-password-resp
 import { ChangePasswordResponseDto } from '../application/dto/change-password-response.dto';
 import { EmailRepository } from '../../notification/infraestructure/adapters/email.repository';
 import { EmailRepositoryData } from '../../notification/domain/interfaces/email-data.interface';
+import { ResponseUserDto } from './dto/response-user.dto';
 
 const saltRounds = 10;
 const TokenConfirmed = 'TOKEN_CONFIRMED';
@@ -160,7 +161,10 @@ export class AuthService {
     return this._createAuthResponse(user);
   }
 
-  async getAllUsers(filters: QueryUserDto): Promise<ResponseUserDbDto[]> {
+  async getAllUsers(
+    filters: QueryUserDto,
+    userConsulting: ResponseUserDbDto,
+  ): Promise<ResponseUserDto[]> {
     const query: Record<string, any> = {};
 
     if (filters.isActive !== undefined) {
@@ -173,31 +177,39 @@ export class AuthService {
     if (filters.email) {
       query.email = filters.email;
     }
-
-    return await this._userRepository.findAll(query);
+    const users: ResponseUserDbDto[] =
+      await this._userRepository.findAll(query);
+    const filtered: ResponseUserDbDto[] = users.filter(
+      (user) => user._id !== userConsulting._id,
+    );
+    return filtered.map((user: ResponseUserDbDto) => ({
+      _id: user._id,
+      email: user.email,
+      userName: user.userName,
+      roles: user.roles,
+      isActive: user.isActive,
+    }));
   }
 
   async updateUser(
     user: ResponseUserDbDto,
     userUpdate: UpdateUserDto,
     userUpdateID: string,
-  ): Promise<ResponseUserDbDto> {
+  ): Promise<ResponseUserDto> {
     if (user._id === userUpdateID) {
       throw new UnauthorizedException('No puedes actualizar tu propio usuario');
     }
-
-    if (userUpdate.isActive !== undefined) {
-      const userToUpdate = await this._userRepository.findOne({
-        _id: userUpdateID,
-      });
-      if (userToUpdate && !userToUpdate.roles.includes(ValidRoles.employee)) {
-        throw new UnauthorizedException(
-          'Solo puedes cambiar el estado de usuarios que sean empleados',
-        );
-      }
-    }
-
-    return await this._userRepository.update(userUpdateID, userUpdate);
+    const updatedUser = await this._userRepository.update(
+      userUpdateID,
+      userUpdate,
+    );
+    return {
+      _id: updatedUser._id,
+      email: updatedUser.email,
+      userName: updatedUser.userName,
+      roles: updatedUser.roles,
+      isActive: updatedUser.isActive,
+    };
   }
 
   async resetPassword(
