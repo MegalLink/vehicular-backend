@@ -12,8 +12,7 @@ import { BrandService } from '../../application/brand.service';
 import { CreateBrandDto } from '../../application/dto/create-brand.dto';
 import { CreateBrandModelDto } from '../../application/dto/create-brand-model.dto';
 import { CreateModelTypeDto } from '../../application/dto/create-model-type.dto';
-import { Auth } from '../../../auth/decorators/auth.decorator';
-import { ValidRoles } from '../../../auth/decorators/role-protect.decorator';
+import { ValidRoles } from '../../../auth/infraestructure/decorators/role-protect.decorator';
 import {
   ApiBody,
   ApiParam,
@@ -33,6 +32,7 @@ import { UpdateBrandModelDto } from '../../application/dto/update-brand-model.dt
 import { UpdateModelTypeDto } from '../../application/dto/update-model-type.dto';
 import { QueryBrandoModelDto } from '../../application/dto/query-brand-models.dto';
 import { QueryBrandoModelTypeDto } from '../../application/dto/query-brand-model-type.dto';
+import { Auth } from '../../../auth/infraestructure/decorators/auth.decorator';
 
 @ApiTags('Brand')
 @Controller('brand')

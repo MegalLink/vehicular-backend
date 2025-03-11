@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { META_ROLES } from 'src/auth/decorators/role-protect.decorator';
+import { META_ROLES } from 'src/auth/infraestructure/decorators/role-protect.decorator';
 import { ResponseUserDbDto } from 'src/auth/application/dto/response-user-db.dto';
 
 @Injectable()

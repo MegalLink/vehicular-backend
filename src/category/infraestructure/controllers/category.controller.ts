@@ -10,8 +10,8 @@ import {
 import { CategoryService } from '../../application/category.service';
 import { CreateCategoryDto } from '../../application/dto/create-category.dto';
 import { UpdateCategoryDto } from '../../application/dto/update-category.dto';
-import { Auth } from '../../../auth/decorators/auth.decorator';
-import { ValidRoles } from '../../../auth/decorators/role-protect.decorator';
+import { Auth } from '../../../auth/infraestructure/decorators/auth.decorator';
+import { ValidRoles } from '../../../auth/infraestructure/decorators/role-protect.decorator';
 import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
 import {
   ErrorNotFoundDto,

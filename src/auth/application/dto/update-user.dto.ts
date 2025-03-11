@@ -6,7 +6,7 @@ import {
   IsIn,
   IsString,
 } from 'class-validator';
-import { ValidRoles } from '../../decorators/role-protect.decorator';
+import { ValidRoles } from '../../infraestructure/decorators/role-protect.decorator';
 
 const validRolesUpdate = Object.values(ValidRoles).filter(
   (role) => role !== ValidRoles.admin,
