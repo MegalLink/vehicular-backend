@@ -330,6 +330,9 @@ export class OrderService {
     if (filters.userID) {
       query.userID = filters.userID;
     }
+    if (filters.orderID) {
+      query.orderID = filters.orderID;
+    }
     if (filters.paymentStatus) {
       query.paymentStatus = filters.paymentStatus;
     }

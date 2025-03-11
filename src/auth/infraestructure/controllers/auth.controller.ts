@@ -214,8 +214,11 @@ export class AuthController {
     description: 'List of users',
     type: [ResponseUserDbDto],
   })
-  getUsers(@Query() queryDto: QueryUserDto) {
-    return this.authService.getAllUsers(queryDto);
+  getUsers(
+    @Query() queryDto: QueryUserDto,
+    @GetUser() user: ResponseUserDbDto,
+  ) {
+    return this.authService.getAllUsers(queryDto, user);
   }
 
   @Patch('user/:searchParam')

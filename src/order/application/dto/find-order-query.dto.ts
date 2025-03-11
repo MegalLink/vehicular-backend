@@ -9,7 +9,13 @@ export class FindOrderQueryDto {
   @IsOptional()
   @IsString()
   userID: string;
-
+  @ApiPropertyOptional({
+    description: 'Unique identifier of the order id',
+    example: '29318238182',
+  })
+  @IsOptional()
+  @IsString()
+  orderID: string;
   @ApiPropertyOptional({
     description: 'Status of the payment',
     example: 'Paid',
