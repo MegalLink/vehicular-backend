@@ -1,6 +1,6 @@
-import { ResponseModelTypeDto } from '../dto/response-model-type.dto';
-import { CreateModelTypeDto } from '../dto/create-model-type.dto';
-import { UpdateModelTypeDto } from '../dto/update-model-type.dto';
+import { ResponseModelTypeDto } from '../../application/dto/response-model-type.dto';
+import { CreateModelTypeDto } from '../../application/dto/create-model-type.dto';
+import { UpdateModelTypeDto } from '../../application/dto/update-model-type.dto';
 
 export interface IModelTypeRepository {
   create(createDTO: CreateModelTypeDto): Promise<ResponseModelTypeDto>;

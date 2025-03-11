@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './application/auth.service';
-import { AuthController } from './infraestructure/auth.controller';
+import { AuthController } from './infraestructure/controllers/auth.controller';
 import { User, UserSchema } from './domain/entities/users.entity';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserRepository } from './domain/repository/auth.repository';
+import { UserRepository } from './infraestructure/persistence/auth.repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvironmentConstants } from 'src/config/env.config';
-import { JwtStrategy } from './application/jwt.strategy';
+import { JwtStrategy } from './infraestructure/strategies/jwt.strategy';
 import { NotificationModule } from '../notification/notification.module';
-import { GooggleStragety } from './application/google.strategy';
+import { GooggleStragety } from './infraestructure/strategies/google.strategy';
 
 const STRATEGY = 'jwt';
 

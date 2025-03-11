@@ -1,14 +1,23 @@
 import { Module } from '@nestjs/common';
-import { UserDetailService } from './user-detail.service';
-import { UserDetailController } from './user-detail.controller';
+import { UserDetailService } from './application/user-detail.service';
+import { UserDetailController } from './infraestructure/controllers/user-detail.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
-import { UserDetail, UserDetailSchema } from './entities/user-detail.entity';
-import { UserDetailRepository } from './repository/user-detail.repository';
+import {
+  UserDetail,
+  UserDetailSchema,
+} from './domain/entities/user-detail.entity';
+import { UserDetailRepository } from './infraestructure/persistence/user-detail.repository';
 
 @Module({
   controllers: [UserDetailController],
-  providers: [UserDetailService, UserDetailRepository],
+  providers: [
+    UserDetailService,
+    {
+      provide: 'IUserDetailRepository',
+      useClass: UserDetailRepository,
+    },
+  ],
   imports: [
     MongooseModule.forFeature([
       { name: UserDetail.name, schema: UserDetailSchema },

@@ -1,6 +1,6 @@
-import { SignUpUserDto } from '../dto/sign-up.dto';
-import { ResponseUserDbDto } from '../dto/response-user-db.dto';
-import { UpdateUserDbDto } from '../dto/update-user-db.dto';
+import { SignUpUserDto } from '../../application/dto/sign-up.dto';
+import { ResponseUserDbDto } from '../../application/dto/response-user-db.dto';
+import { UpdateUserDbDto } from '../../application/dto/update-user-db.dto';
 
 export interface IUserRepository {
   create(createUserDto: SignUpUserDto | object): Promise<ResponseUserDbDto>;

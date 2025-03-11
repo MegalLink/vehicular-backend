@@ -1,14 +1,14 @@
-import { CreateCategoryDto } from '../dto/create-category.dto';
-import { ResponseCategoryDto } from '../dto/response-category.dto';
-import { UpdateCategoryDto } from '../dto/update-category.dto';
+import { ICreateCategory } from '../interfaces/create-category.interface';
+import { IResponseCategory } from '../interfaces/response-category.interface';
+import { IUpdateCategory } from '../interfaces/update-category.interface';
 
 export interface ICategoryRepository {
-  create(createCategoryDto: CreateCategoryDto): Promise<ResponseCategoryDto>;
-  findAll(): Promise<ResponseCategoryDto[]>;
-  findOne(searchParam: object): Promise<ResponseCategoryDto | undefined>;
-  remove(searchParam: string): Promise<ResponseCategoryDto>;
+  create(createCategory: ICreateCategory): Promise<IResponseCategory>;
+  findAll(): Promise<IResponseCategory[]>;
+  findOne(searchParam: object): Promise<IResponseCategory | undefined>;
+  remove(searchParam: string): Promise<IResponseCategory>;
   update(
     searchParam: string,
-    updateCategoryDto: UpdateCategoryDto,
-  ): Promise<ResponseCategoryDto>;
+    updateCategory: IUpdateCategory,
+  ): Promise<IResponseCategory>;
 }

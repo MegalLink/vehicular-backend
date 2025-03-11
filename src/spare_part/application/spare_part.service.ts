@@ -1,38 +1,32 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateSparePartDto } from '../domain/dto/create_spare_part.dto';
-import { UpdateSparePartDto } from '../domain/dto/update_spare_part.dto';
-import { ISparePartService } from './spare_part.service.interface';
-import { SparePartRepository } from '../domain/repository/spare_part.repository';
-import { ISparePartRepository } from '../domain/repository/spare_part.respository.interface';
-import { ResponseSparePartDto } from '../domain/dto/response_spare_part.dto';
-import { GetAllResponseSparePartDto } from '../domain/dto/get_all_response_spare_part.dto';
+import { CreateSparePartDto } from './dto/create_spare_part.dto';
+import { UpdateSparePartDto } from './dto/update_spare_part.dto';
+import { ISparePartService } from '../domain/ports/spare_part.service.interface';
+import { ISparePartRepository } from '../domain/repository/spare_part.repository.interface';
+import { ResponseSparePartDto } from './dto/response_spare_part.dto';
+import { GetAllResponseSparePartDto } from './dto/get_all_response_spare_part.dto';
 import { isValidObjectId } from 'mongoose';
-import { QuerySparePartDto } from '../domain/dto/query_spare_part.dto';
-import { ResponseUserDbDto } from 'src/auth/domain/dto/response-user-db.dto';
+import { QuerySparePartDto } from './dto/query_spare_part.dto';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentConstants } from 'src/config/env.config';
 
 @Injectable()
 export class SparePartService implements ISparePartService {
   constructor(
-    @Inject(SparePartRepository)
+    @Inject('ISparePartRepository')
     private readonly sparePartRepository: ISparePartRepository,
     private readonly configService: ConfigService,
   ) {}
 
   async create(
     createSparePartDto: CreateSparePartDto,
-    user: ResponseUserDbDto,
   ): Promise<ResponseSparePartDto> {
-    const createSparePart = {
-      ...createSparePartDto,
-      user_id: user._id,
-      createdBy: user.userName,
-    };
-    return await this.sparePartRepository.create(createSparePart);
+    return await this.sparePartRepository.create(createSparePartDto);
   }
 
-  async findAll(queryDto: QuerySparePartDto): Promise<GetAllResponseSparePartDto> {
+  async findAll(
+    queryDto: QuerySparePartDto,
+  ): Promise<GetAllResponseSparePartDto> {
     const query = this.buildQuery(queryDto);
     const { offset = 0, limit = 0 } = queryDto;
 
@@ -41,7 +35,9 @@ export class SparePartService implements ISparePartService {
       this.sparePartRepository.findAll(query, offset, limit),
     ]);
 
-    const baseUrl = this.configService.get<string>(EnvironmentConstants.rest_api_url);
+    const baseUrl = this.configService.get<string>(
+      EnvironmentConstants.rest_api_url,
+    );
     const hasNext = offset + limit < total;
     const hasPrevious = offset > 0;
 

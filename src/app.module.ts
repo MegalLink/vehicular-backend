@@ -14,7 +14,7 @@ import { EnvValidationSchema } from './config/joi.schema.validation';
 import { FilesModule } from './files/files.module';
 import { BrandModule } from './brand/brand.module';
 import { CategoryModule } from './category/category.module';
-import { LoggerMiddleware } from './common/domain/repository/logger.middleware';
+import { LoggerMiddleware } from './common/infraestructure/middleware/logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { NotificationModule } from './notification/notification.module';
 import { UserDetailModule } from './user-detail/user-detail.module';

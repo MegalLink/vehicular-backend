@@ -1,13 +1,13 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { IGenericFileRepository } from '../domain/repository/file.repository.interface';
-import { ResponseFileDto } from 'src/files/domain/dto/reponse_file.dto';
-import { FileRepository } from '../domain/repository/file.repository';
+import { ResponseFileDto } from 'src/files/domain/dto/response_file.dto';
+import { FileRepository } from '../infraestructure/adapters/file.repository';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { IFilesService } from './files.service.interface';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentConstants } from '../../config/env.config';
-import { ImageFileExtensionEnum } from '../helpers/ImageFileExtensionEnum';
+import { ImageFileExtensionEnum } from '../infraestructure/helpers/ImageFileExtensionEnum';
 
 @Injectable()
 export class FilesService implements IFilesService {

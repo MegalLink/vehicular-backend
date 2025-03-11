@@ -1,11 +1,11 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateCategoryDto } from '../domain/dto/create-category.dto';
-import { UpdateCategoryDto } from '../domain/dto/update-category.dto';
-import { ICategoryService } from './category.service.interface';
+import { ICategoryService } from '../domain/ports/category.service.interface';
 import { ICategoryRepository } from '../domain/repository/category.repository.interface';
-import { CategoryRepository } from '../domain/repository/category.repository';
-import { ResponseCategoryDto } from '../domain/dto/response-category.dto';
+import { CategoryRepository } from '../infraestructure/persistence/category.repository';
 import { isValidObjectId } from 'mongoose';
+import { IResponseCategory } from '../domain/interfaces/response-category.interface';
+import { ICreateCategory } from '../domain/interfaces/create-category.interface';
+import { IUpdateCategory } from '../domain/interfaces/update-category.interface';
 
 @Injectable()
 export class CategoryService implements ICategoryService {
@@ -14,21 +14,19 @@ export class CategoryService implements ICategoryService {
     private readonly categoryRepository: ICategoryRepository,
   ) {}
 
-  async create(
-    createCategoryDto: CreateCategoryDto,
-  ): Promise<ResponseCategoryDto> {
+  async create(createCategoryDto: ICreateCategory): Promise<IResponseCategory> {
     const category = await this.categoryRepository.create(createCategoryDto);
 
     return category;
   }
 
-  async findAll(): Promise<ResponseCategoryDto[]> {
+  async findAll(): Promise<IResponseCategory[]> {
     const response = await this.categoryRepository.findAll();
 
     return response;
   }
 
-  async findOne(searchParam: string): Promise<ResponseCategoryDto> {
+  async findOne(searchParam: string): Promise<IResponseCategory> {
     const query: object = isValidObjectId(searchParam)
       ? { _id: searchParam }
       : { name: searchParam };
@@ -43,8 +41,8 @@ export class CategoryService implements ICategoryService {
 
   async update(
     searchParam: string,
-    updateCategoryDto: UpdateCategoryDto,
-  ): Promise<ResponseCategoryDto> {
+    updateCategoryDto: IUpdateCategory,
+  ): Promise<IResponseCategory> {
     const category = await this.categoryRepository.update(
       searchParam,
       updateCategoryDto,
@@ -53,7 +51,7 @@ export class CategoryService implements ICategoryService {
     return category;
   }
 
-  async remove(searchParam: string): Promise<ResponseCategoryDto> {
+  async remove(searchParam: string): Promise<IResponseCategory> {
     const deleted_item = await this.categoryRepository.remove(searchParam);
 
     return deleted_item;
