@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Post,
@@ -77,22 +76,6 @@ export class OrderController {
   })
   findOne(@Param('id') id: string, @GetUser() user: ResponseUserDbDto) {
     return this.orderService.findOne(id, user);
-  }
-
-  @Delete(':id')
-  @Auth(ValidRoles.employee, ValidRoles.admin)
-  @ApiResponse({
-    status: 200,
-    description: 'Delete order',
-    type: ResponseOrderDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Not found item _id',
-    type: ErrorNotFoundDto,
-  })
-  remove(@Param('id') id: string, @GetUser() user: ResponseUserDbDto) {
-    return this.orderService.remove(id, user);
   }
 
   @Post('stripe-payment')

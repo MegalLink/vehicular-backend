@@ -101,6 +101,10 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales no validas');
     }
 
+    if (!user.isActive) {
+      throw new UnauthorizedException('Usuario inactivo');
+    }
+
     if (!user.password) {
       throw new UnauthorizedException('Esta cuenta esta registrada con google');
     }

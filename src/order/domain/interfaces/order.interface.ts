@@ -29,7 +29,6 @@ export interface ICreateOrderDB {
 
 // Interfaz que coincide con ResponseOrderDbDto
 export interface IOrder extends ICreateOrderDB {
-  _id: string;
   paymentStatus: string;
   paymentID: string;
   createdAt: Date;

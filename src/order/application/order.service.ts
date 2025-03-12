@@ -26,9 +26,10 @@ import { PdfRepository } from '../../common/infraestructure/adapters/pdf-reposit
 import { SparePartService } from 'src/spare_part/application/spare_part.service';
 import { ICreateOrderDB, IOrder } from '../domain/interfaces/order.interface';
 import { EmailRepositoryData } from '../../notification/domain/interfaces/email-data.interface';
+import { IOrderService } from '../domain/ports/order.service.interface';
 
 @Injectable()
-export class OrderService {
+export class OrderService implements IOrderService {
   private _stripe: Stripe;
 
   constructor(
@@ -88,9 +89,16 @@ export class OrderService {
 
     const userDetail: ResponseUserDetailDbDto =
       await this.userDetailService.findOne(createOrder.userDetailID, user);
+
     if (!userDetail) {
       throw new NotFoundException(
         `Detalles de usuario con id ${createOrder.userDetailID} no encontrados`,
+      );
+    }
+
+    if (userDetail.userID !== user._id) {
+      throw new BadRequestException(
+        'No tienes permiso para acceder a estos detallas de usuario',
       );
     }
 
@@ -150,20 +158,6 @@ export class OrderService {
     return this._transformToResponseOrderDto(response);
   }
 
-  async remove(searchParam: string, user: ResponseUserDbDto): Promise<IOrder> {
-    const order = await this.findOne(searchParam, user);
-
-    // Recuperar el stock
-    for (const item of order.items) {
-      const sparePart = await this.sparePartService.findOne(item.code);
-      await this.sparePartService.update(sparePart._id, {
-        stock: sparePart.stock + item.quantity,
-      });
-    }
-
-    return await this.orderRepository.remove(searchParam);
-  }
-
   async stripeWebhook(body: Buffer, signature: string) {
     const endpointSecret = this._configService.get<string>(
       EnvironmentConstants.stripe_webhook_secret,
@@ -196,7 +190,7 @@ export class OrderService {
         if (!order) {
           throw new NotFoundException(`Orden con id ${orderID} no encontrada`);
         }
-        const orderUpdated = await this.orderRepository.update(order._id, {
+        const orderUpdated = await this.orderRepository.update(order.orderID, {
           paymentStatus: paymentStatus,
           paymentID: paymentID,
         });

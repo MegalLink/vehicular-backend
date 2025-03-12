@@ -21,8 +21,6 @@ export interface IOrderService {
     user: ResponseUserDbDto,
   ): Promise<ResponseOrderDto>;
 
-  remove(searchParam: string, user: ResponseUserDbDto): Promise<IOrder>;
-
   stripeWebhook(body: Buffer, signature: string): Promise<void>;
 
   stripePayment(

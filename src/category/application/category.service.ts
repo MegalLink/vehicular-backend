@@ -33,7 +33,9 @@ export class CategoryService implements ICategoryService {
     const response = await this.categoryRepository.findOne(query);
 
     if (!response) {
-      throw new NotFoundException(`Categoria con ${query} no encontrada`);
+      throw new NotFoundException(
+        `Categoria con ${JSON.stringify(query)} no encontrada`,
+      );
     }
 
     return response;

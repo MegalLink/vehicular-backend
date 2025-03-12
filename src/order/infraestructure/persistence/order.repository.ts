@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { BaseRepository } from 'src/common/infraestructure/adapters/mongo_base_repository';
 import { Order } from '../../domain/entities/order.entity';
 import { IOrderRepository } from '../../domain/repository/order.respository.interface';
-import { ObjectId } from 'mongodb';
 import { IOrder } from 'src/order/domain/interfaces/order.interface';
 
 @Injectable()
@@ -21,7 +20,6 @@ export class OrderRepository
 
   transform(entity: Order): IOrder {
     return {
-      _id: (entity._id as ObjectId).toString(),
       orderID: entity.orderID,
       userID: entity.userID,
       userDetail: entity.userDetail,
