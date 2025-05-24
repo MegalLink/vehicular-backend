@@ -5,6 +5,8 @@ import {
   IsArray,
   ArrayNotEmpty,
   ValidateNested,
+  IsPositive,
+  IsInt,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -24,6 +26,8 @@ class Item {
   })
   @IsNotEmpty()
   @IsNumber()
+  @IsPositive()
+  @IsInt()
   quantity: number;
 }
 
