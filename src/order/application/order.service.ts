@@ -176,7 +176,7 @@ export class OrderService implements IOrderService {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
     console.log('Event', event);
-    console.log('Event', event.type);
+    console.log('Event type', event.type);
     try {
       switch (event.type) {
         case 'checkout.session.completed':
