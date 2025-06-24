@@ -111,10 +111,7 @@ export class AuthController {
       await this.authService.confirmResetPassword(token);
 
       const filePath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        process.cwd(),
         'static',
         'templates',
         'success-reset-password.html',
@@ -156,10 +153,7 @@ export class AuthController {
       await this.authService.confirmEmail(token);
 
       const filePath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        process.cwd(),
         'static',
         'templates',
         'success-confirmation-email.html',

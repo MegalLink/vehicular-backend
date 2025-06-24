@@ -13,7 +13,6 @@ export class LocalFilesRepository implements IGenericFileRepository {
 
   async uploadFile(
     filePath: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     folderOutputPath: string,
   ): Promise<ResponseFileDto> {
     const apiUrl = this._configService.get(EnvironmentConstants.rest_api_url);
