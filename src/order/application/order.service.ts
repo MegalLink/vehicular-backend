@@ -45,7 +45,7 @@ export class OrderService implements IOrderService {
   ) {
     this._stripe = new Stripe(
       this._configService.get(EnvironmentConstants.stripe_secret_key)!,
-      { apiVersion: '2024-06-20' },
+      { apiVersion: '2025-05-28.basil' },
     );
   }
 
@@ -176,7 +176,7 @@ export class OrderService implements IOrderService {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
     console.log('Event', event);
-
+    console.log('Event', event.type);
     try {
       switch (event.type) {
         case 'checkout.session.completed':
