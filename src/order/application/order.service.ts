@@ -159,6 +159,7 @@ export class OrderService implements IOrderService {
   }
 
   async stripeWebhook(body: Buffer, signature: string) {
+    console.log('Received Stripe webhook event');
     const endpointSecret = this._configService.get<string>(
       EnvironmentConstants.stripe_webhook_secret,
     );
@@ -174,53 +175,66 @@ export class OrderService implements IOrderService {
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
+    console.log('Event', event);
 
-    switch (event.type) {
-      case 'checkout.session.completed':
-        const session = event.data.object as Stripe.Checkout.Session;
-        const orderID: string = session.metadata!.orderID!;
-        const userEmail: string = session.metadata!.userEmail!;
-        const tax: string = session.metadata!.tax!;
-        console.log('PAYMENT CHECKOUT SESSION', session);
-        console.log('PAYMENT CHECKOUT SESSION json', JSON.stringify(session));
-        const paymentStatus: string = session.payment_status.toString();
-        const paymentID: string | undefined =
-          session.payment_intent?.toString();
-        const order = await this.orderRepository.findOne({ orderID: orderID });
-        if (!order) {
-          throw new NotFoundException(`Orden con id ${orderID} no encontrada`);
-        }
-        const orderUpdated = await this.orderRepository.update(order.orderID, {
-          paymentStatus: paymentStatus,
-          paymentID: paymentID,
-        });
-
-        for (const item of order.items) {
-          const sparePart = await this.sparePartService.findOne(item.code);
-          await this.sparePartService.update(sparePart._id, {
-            stock: sparePart.stock - item.quantity,
+    try {
+      switch (event.type) {
+        case 'checkout.session.completed':
+          const session = event.data.object as Stripe.Checkout.Session;
+          const orderID: string = session.metadata!.orderID!;
+          const userEmail: string = session.metadata!.userEmail!;
+          const tax: string = session.metadata!.tax!;
+          console.log('PAYMENT CHECKOUT SESSION', session);
+          console.log('PAYMENT CHECKOUT SESSION json', JSON.stringify(session));
+          const paymentStatus: string = session.payment_status.toString();
+          const paymentID: string | undefined =
+            session.payment_intent?.toString();
+          const order = await this.orderRepository.findOne({
+            orderID: orderID,
           });
-        }
-        const invoicePDF: Buffer = await this._pdfRepository.generateInvoice(
-          orderUpdated,
-          { tax: +tax, paymentWith: 'Stripe', paymentID: paymentID! },
-        );
+          if (!order) {
+            throw new NotFoundException(
+              `Orden con id ${orderID} no encontrada`,
+            );
+          }
+          const orderUpdated = await this.orderRepository.update(
+            order.orderID,
+            {
+              paymentStatus: paymentStatus,
+              paymentID: paymentID,
+            },
+          );
 
-        const response = await this._fileRepository.uploadBufferFile(
-          invoicePDF,
-          'pdf',
-        );
+          for (const item of order.items) {
+            const sparePart = await this.sparePartService.findOne(item.code);
+            await this.sparePartService.update(sparePart._id, {
+              stock: sparePart.stock - item.quantity,
+            });
+          }
+          const invoicePDF: Buffer = await this._pdfRepository.generateInvoice(
+            orderUpdated,
+            { tax: +tax, paymentWith: 'Stripe', paymentID: paymentID! },
+          );
 
-        const emailData: EmailRepositoryData = this._sendReceiptEmailData(
-          userEmail,
-          order.userDetail.firstName,
-          response.fileUrl,
-        );
-        await this._emailRepository.sendEmail(emailData);
+          const response = await this._fileRepository.uploadBufferFile(
+            invoicePDF,
+            'pdf',
+          );
 
-        break;
-      default:
-        return;
+          const emailData: EmailRepositoryData = this._sendReceiptEmailData(
+            userEmail,
+            order.userDetail.firstName,
+            response.fileUrl,
+          );
+          await this._emailRepository.sendEmail(emailData);
+
+          break;
+        default:
+          return;
+      }
+    } catch (error) {
+      console.error('Error processing webhook event:', error);
+      throw new BadRequestException(`Error processing webhook event: ${error}`);
     }
   }
 
