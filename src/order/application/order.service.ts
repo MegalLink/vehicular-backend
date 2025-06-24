@@ -184,8 +184,6 @@ export class OrderService implements IOrderService {
           const orderID: string = session.metadata!.orderID!;
           const userEmail: string = session.metadata!.userEmail!;
           const tax: string = session.metadata!.tax!;
-          console.log('PAYMENT CHECKOUT SESSION', session);
-          console.log('PAYMENT CHECKOUT SESSION json', JSON.stringify(session));
           const paymentStatus: string = session.payment_status.toString();
           const paymentID: string | undefined =
             session.payment_intent?.toString();
@@ -197,13 +195,10 @@ export class OrderService implements IOrderService {
               `Orden con id ${orderID} no encontrada`,
             );
           }
-          const orderUpdated = await this.orderRepository.update(
-            order.orderID,
-            {
-              paymentStatus: paymentStatus,
-              paymentID: paymentID,
-            },
-          );
+          const orderUpdated = await this.orderRepository.update(order._id, {
+            paymentStatus: paymentStatus,
+            paymentID: paymentID,
+          });
 
           for (const item of order.items) {
             const sparePart = await this.sparePartService.findOne(item.code);

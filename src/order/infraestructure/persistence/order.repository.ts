@@ -5,6 +5,7 @@ import { BaseRepository } from 'src/common/infraestructure/adapters/mongo_base_r
 import { Order } from '../../domain/entities/order.entity';
 import { IOrderRepository } from '../../domain/repository/order.respository.interface';
 import { IOrder } from 'src/order/domain/interfaces/order.interface';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class OrderRepository
@@ -20,6 +21,7 @@ export class OrderRepository
 
   transform(entity: Order): IOrder {
     return {
+      _id: (entity._id as ObjectId).toString(),
       orderID: entity.orderID,
       userID: entity.userID,
       userDetail: entity.userDetail,
