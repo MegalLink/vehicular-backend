@@ -187,14 +187,21 @@ export class OrderService implements IOrderService {
           const paymentStatus: string = session.payment_status.toString();
           const paymentID: string | undefined =
             session.payment_intent?.toString();
+          console.log('Tax:', tax);
+          console.log('Payment Status:', paymentStatus);
+          console.log('Payment ID:', paymentID);
+          console.log('Order ID:', orderID);
           const order = await this.orderRepository.findOne({
             orderID: orderID,
           });
+
           if (!order) {
+            console.error('Order not found:', orderID);
             throw new NotFoundException(
               `Orden con id ${orderID} no encontrada`,
             );
           }
+          console.log('Order found:', order);
           const orderUpdated = await this.orderRepository.update(order._id, {
             paymentStatus: paymentStatus,
             paymentID: paymentID,
