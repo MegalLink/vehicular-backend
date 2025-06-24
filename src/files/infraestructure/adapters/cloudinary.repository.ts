@@ -34,35 +34,44 @@ export class CloudinaryRepository implements IGenericFileRepository {
     folderOutputPath: string,
   ): Promise<ResponseFileDto> {
     return new Promise((resolve, reject) => {
-      const uploadStream = v2.uploader.upload_stream({
-        folder: folderOutputPath,
-      });
+      const uploadStream = v2.uploader.upload_stream(
+        {
+          folder: folderOutputPath,
+          resource_type: 'auto',
+        },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary upload error:', error);
+            return reject(
+              new InternalServerErrorException(
+                `Cloudinary upload failed: ${error.message}`,
+              ),
+            );
+          }
+          if (!result) {
+            return reject(
+              new InternalServerErrorException(
+                'No se recibió respuesta de Cloudinary',
+              ),
+            );
+          }
+          console.log('Upload successful:', {
+            url: result.secure_url,
+            format: result.format,
+            bytes: result.bytes,
+            width: result.width,
+            height: result.height,
+          });
+          resolve({
+            fileUrl: result.secure_url || result.url,
+          });
+        },
+      );
 
-      // Convert Buffer to Readable Stream
       const readableStream = new Readable();
       readableStream.push(buffer);
-      readableStream.push(null); // End the stream
+      readableStream.push(null);
       readableStream.pipe(uploadStream);
-
-      // Wrap uploadStream in a Promise to handle with then/catch
-      const streamPromise = new Promise((resolveStream, rejectStream) => {
-        uploadStream.on('finish', resolveStream); // Resolve when the stream finishes
-        uploadStream.on('error', rejectStream); // Reject on stream error
-      });
-
-      streamPromise
-        .then((result: UploadApiResponse) => {
-          resolve({
-            fileUrl: result.url,
-          });
-        })
-        .catch((error) => {
-          reject(
-            new InternalServerErrorException(
-              `Cloudinary upload failed: ${error.message}`,
-            ),
-          );
-        });
     });
   }
 
