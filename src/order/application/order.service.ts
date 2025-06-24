@@ -299,6 +299,7 @@ export class OrderService implements IOrderService {
 
   private _transformToResponseOrderDto(order: IOrder): ResponseOrderDto {
     return {
+      _id: order._id,
       orderID: order.orderID,
       userID: order.userID,
       userDetail: order.userDetail,

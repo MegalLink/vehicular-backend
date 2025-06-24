@@ -3,6 +3,11 @@ import { ApiProperty } from '@nestjs/swagger';
 export class ResponseOrderDto {
   @ApiProperty({
     description: 'Unique identifier of the order',
+    example: '60c72b2f9b1e8d001c8e4a2b',
+  })
+  _id: string;
+  @ApiProperty({
+    description: 'Unique identifier of the order',
     example: 'ORDER12345',
   })
   orderID: string;
