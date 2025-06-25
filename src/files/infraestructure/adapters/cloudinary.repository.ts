@@ -85,10 +85,11 @@ export class CloudinaryRepository implements IGenericFileRepository {
       })
       .then((result: UploadApiResponse) => {
         return {
-          fileUrl: result.url,
+          fileUrl: result.secure_url || result.url,
         };
       })
       .catch((err) => {
+        console.error('Error uploading file to Cloudinary:', err);
         throw new InternalServerErrorException(err);
       })
       .finally(() => {
