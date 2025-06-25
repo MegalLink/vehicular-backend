@@ -213,6 +213,9 @@ export class OrderService implements IOrderService {
               stock: sparePart.stock - item.quantity,
             });
           }
+          const environment = this._configService.get(
+            EnvironmentConstants.environment,
+          );
           const invoicePDF: Buffer = await this._pdfRepository.generateInvoice(
             orderUpdated,
             { tax: +tax, paymentWith: 'Stripe', paymentID: paymentID! },
@@ -220,7 +223,7 @@ export class OrderService implements IOrderService {
 
           const response = await this._fileRepository.uploadBufferFile(
             invoicePDF,
-            'pdf',
+            `${environment}/pdf`,
           );
 
           const emailData: EmailRepositoryData = this._sendReceiptEmailData(
