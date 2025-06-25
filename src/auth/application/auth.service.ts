@@ -45,49 +45,35 @@ export class AuthService {
   ) {}
 
   async signUp(signUpDto: SignUpUserDto): Promise<SignUpResponseDto> {
+    const existUser = await this._userRepository.findOne({
+      email: signUpDto.email,
+    });
+
+    if (existUser && existUser.isEmailConfirmed) {
+      throw new BadRequestException(
+        `Ya existe una cuenta con el email ${existUser.email}`,
+      );
+    }
+
     const token: string = this._getJWT({
       email: signUpDto.email,
       userName: signUpDto.userName,
       roles: [ValidRoles.user], // Default role on register
     });
-    try {
-      const { password, ...userData } = signUpDto;
 
-      await this._emailRepository.sendEmail(
-        this._confirmationEmailData(signUpDto.email, token),
-      );
-      const user = await this._userRepository.create({
-        ...userData,
-        password: hashSync(password, saltRounds),
-        confirmationToken: token,
-      });
-      return {
-        message: `Un email de confirmación ha sido enviado ${user.email}, porfavor revisa tu bandeja de entrada`,
-      };
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        const user = await this._userRepository.findOne({
-          email: signUpDto.email,
-        });
+    const { password, ...userData } = signUpDto;
 
-        if (
-          user &&
-          !user.isEmailConfirmed &&
-          user.confirmationToken !== TokenConfirmed
-        ) {
-          await this._userRepository.update(user._id, {
-            confirmationToken: token,
-          });
-        }
-
-        const message = user
-          ? `Ya existe una cuenta con el email ${user.email}`
-          : `Porfavor confirme su registro, un email ha sido enviado a su correo electrónico`;
-        throw new BadRequestException(message);
-      }
-
-      throw error;
-    }
+    await this._emailRepository.sendEmail(
+      this._confirmationEmailData(signUpDto.email, token),
+    );
+    const user = await this._userRepository.create({
+      ...userData,
+      password: hashSync(password, saltRounds),
+      confirmationToken: token,
+    });
+    return {
+      message: `Un email de confirmación ha sido enviado ${user.email}, porfavor revisa tu bandeja de entrada`,
+    };
   }
 
   async signIn(signInDto: SignInUserDto): Promise<SignInResponseDto> {
