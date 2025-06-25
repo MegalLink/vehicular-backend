@@ -47,7 +47,7 @@ export class QuerySparePartDto {
   @ApiPropertyOptional({
     description: 'Number of items to return',
     example: 20,
-    default: 20,
+    default: 0,
   })
-  limit?: number = 20;
+  limit?: number = 0;
 }
