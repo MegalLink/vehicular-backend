@@ -6,6 +6,7 @@ import {
   UploadedFile,
   UseInterceptors,
   Res,
+  Query,
 } from '@nestjs/common';
 import { FilesService } from '../../application/files.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -66,15 +67,18 @@ export class FilesController {
   ) {
     return this.filesService.uploadImage(image);
   }
-  @Get('local/:fileName')
-  @ApiOperation({ summary: 'Get a local image' })
+  @Get('local/')
+  @ApiOperation({ summary: 'Get a local file (dev only)' })
   @ApiResponse({ status: 200, description: 'Image retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Image not found' })
-  getLocalImage(
-    @Res() response: Response,
-    @Param('fileName') fileName: string,
-  ) {
-    const path = this.filesService.getStaticFile(fileName);
+  getLocalImage(@Res() response: Response, @Query('path') filePath: string) {
+    if (process.env.NODE_ENV !== 'dev') {
+      return response
+        .status(403)
+        .json({ message: 'Forbidden in this environment' });
+    }
+
+    const path = this.filesService.getStaticFile(filePath);
     response.sendFile(path);
   }
 }

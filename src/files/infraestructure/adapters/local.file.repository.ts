@@ -18,8 +18,13 @@ export class LocalFilesRepository implements IGenericFileRepository {
     const apiUrl = this._configService.get(EnvironmentConstants.rest_api_url);
     const pathParts = filePath.split('/');
     const fileName = pathParts[pathParts.length - 1];
+    const fileUrl = `http://${apiUrl}files/local?path=${fileName}`.replace(
+      /\\/g,
+      '/',
+    );
+
     return {
-      fileUrl: `http://${apiUrl}files/local/${fileName}`,
+      fileUrl,
     };
   }
 
@@ -28,29 +33,31 @@ export class LocalFilesRepository implements IGenericFileRepository {
     folderOutputPath: string,
   ): Promise<ResponseFileDto> {
     const apiUrl = this._configService.get(EnvironmentConstants.rest_api_url);
-    const fileName = `${v4()}.pdf`; // Generating a unique file name
+    const fileName = `${v4()}.pdf`;
     const localDirectory: string = join(
       process.cwd(),
-      `static/${folderOutputPath}/`,
+      'static',
+      folderOutputPath,
     );
     const filePath: string = join(localDirectory, fileName);
 
-    // Ensure folder exists and save the file
     return new Promise((resolve, reject) => {
-      fs.mkdir(folderOutputPath, { recursive: true }, (dirErr) => {
+      fs.mkdir(localDirectory, { recursive: true }, (dirErr) => {
         if (dirErr) {
           return reject(new Error('Failed to create directory'));
         }
 
-        // Save the buffer to the local file system with the file name
         fs.writeFile(filePath, buffer, (err) => {
           if (err) {
             return reject(new Error('Failed to save invoice file'));
           }
 
-          // Resolve with the file URL, linking to the saved file
           resolve({
-            fileUrl: `http://${apiUrl}files/local/${fileName}`,
+            fileUrl:
+              `http://${apiUrl}files/local?path=${folderOutputPath}/${fileName}`.replace(
+                /\\/g,
+                '/',
+              ),
           });
         });
       });

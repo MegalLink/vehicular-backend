@@ -30,33 +30,16 @@ export class FilesService implements IFilesService {
     return this._fileRepository.uploadFile(image.path, outputFolderPath);
   }
 
-  getStaticFile(fileName: string): string {
-    const fileExtension = fileName.split('.').pop();
-    const imageFormatsArray: string[] = Object.values(ImageFileExtensionEnum);
-    let fileExtensionFolder: string = '';
+  getStaticFile(filePath: string): string {
+    const normalizedPath = filePath.replace(/\\/g, '/');
+    const fullPath = join(process.cwd(), normalizedPath);
 
-    switch (true) {
-      case imageFormatsArray.includes(fileExtension!):
-        fileExtensionFolder = 'images';
-        break;
-      default:
-        fileExtensionFolder = 'pdf';
-        break;
-    }
-
-    return this._getStaticFile(fileName, fileExtensionFolder);
-  }
-
-  private _getStaticFile(fileName: string, staticPath: string): string {
-    const imagesDirPath: string = join(process.cwd(), `static/${staticPath}/`);
-    const filePath: string = join(imagesDirPath, fileName);
-
-    if (!existsSync(filePath)) {
+    if (!existsSync(fullPath)) {
       throw new BadRequestException(
-        `No se encontró archivo con nombre ${fileName}`,
+        `No se encontró archivo con nombre ${filePath}`,
       );
     }
 
-    return filePath;
+    return fullPath;
   }
 }
