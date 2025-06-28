@@ -50,6 +50,6 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## License
+## Documentación de la Base de Datos
 
-Nest is [MIT licensed](LICENSE).
+Puedes encontrar el diagrama de entidad-relación y la documentación completa de la base de datos en el archivo [DATABASE.md](./DATABASE.md).

@@ -22,6 +22,8 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { ResponseFileDto } from '../../domain/dto/response_file.dto';
+import { Auth } from '../../../auth/infraestructure/decorators/auth.decorator';
+import { ValidRoles } from '../../../auth/infraestructure/decorators/role-protect.decorator';
 
 @ApiTags('files')
 @Controller('files')
@@ -61,23 +63,19 @@ export class FilesController {
     type: ResponseFileDto,
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
+  @Auth(ValidRoles.admin, ValidRoles.employee)
   UploadImage(
     @UploadedFile()
     image: Express.Multer.File,
   ) {
     return this.filesService.uploadImage(image);
   }
+
   @Get('local/')
   @ApiOperation({ summary: 'Get a local file (dev only)' })
   @ApiResponse({ status: 200, description: 'Image retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Image not found' })
   getLocalImage(@Res() response: Response, @Query('path') filePath: string) {
-    if (process.env.NODE_ENV !== 'dev') {
-      return response
-        .status(403)
-        .json({ message: 'Forbidden in this environment' });
-    }
-
     const path = this.filesService.getStaticFile(filePath);
     response.sendFile(path);
   }

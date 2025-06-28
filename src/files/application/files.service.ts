@@ -31,6 +31,15 @@ export class FilesService implements IFilesService {
   }
 
   getStaticFile(filePath: string): string {
+    const environment = this._configService.get(
+      EnvironmentConstants.environment,
+    );
+    if (environment !== 'dev') {
+      throw new BadRequestException(
+        'No se puede acceder a archivos locales en este entorno',
+      );
+    }
+
     const normalizedPath = filePath.replace(/\\/g, '/');
     const fullPath = join(process.cwd(), normalizedPath);
 
