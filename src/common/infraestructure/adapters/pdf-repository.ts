@@ -228,7 +228,7 @@ export class PdfRepository implements IPdfRepository {
         {
           columns: [
             {
-              text: `Payment Status: ${order.paymentStatus}`,
+              text: `Payment platform ID: ${additionalData.paymentID}`,
               style: 'statusText',
               margin: [0, 20, 0, 10],
             },
