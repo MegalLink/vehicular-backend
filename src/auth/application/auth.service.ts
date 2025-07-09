@@ -55,6 +55,12 @@ export class AuthService {
       );
     }
 
+    if (existUser && !existUser.isEmailConfirmed) {
+      throw new BadRequestException(
+        `Ya se ha enviado un email de confirmación a esta cuenta ${existUser.email}, porfavor confirma tu email`,
+      );
+    }
+
     const token: string = this._getJWT({
       email: signUpDto.email,
       userName: signUpDto.userName,
