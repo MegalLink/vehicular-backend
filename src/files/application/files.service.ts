@@ -26,7 +26,7 @@ export class FilesService implements IFilesService {
       EnvironmentConstants.environment,
     );
     const outputFolderPath: string = `${environment}/images`;
-    console.log('Trying to upload image to path:', outputFolderPath);
+
     return this._fileRepository.uploadFile(image.path, outputFolderPath);
   }
 

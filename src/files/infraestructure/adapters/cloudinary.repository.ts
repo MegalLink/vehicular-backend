@@ -55,13 +55,7 @@ export class CloudinaryRepository implements IGenericFileRepository {
               ),
             );
           }
-          console.log('Upload successful:', {
-            url: result.secure_url,
-            format: result.format,
-            bytes: result.bytes,
-            width: result.width,
-            height: result.height,
-          });
+
           resolve({
             fileUrl: result.secure_url || result.url,
           });

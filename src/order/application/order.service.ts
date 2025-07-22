@@ -159,7 +159,6 @@ export class OrderService implements IOrderService {
   }
 
   async stripeWebhook(body: Buffer, signature: string) {
-    console.log('Received Stripe webhook event');
     const endpointSecret = this._configService.get<string>(
       EnvironmentConstants.stripe_webhook_secret,
     );
@@ -175,8 +174,7 @@ export class OrderService implements IOrderService {
     } catch (err) {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
-    console.log('Event', event);
-    console.log('Event type', event.type);
+
     try {
       switch (event.type) {
         case 'checkout.session.completed':
