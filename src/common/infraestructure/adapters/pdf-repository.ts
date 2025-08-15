@@ -9,7 +9,7 @@ import {
   OrderDto,
 } from '../../domain/interfaces/pdf-repository.interface';
 
-const FRANCHISE_MAIN_COLOR = '#FE9900';
+const FRANCHISE_MAIN_COLOR = '#5189AB';
 const SECONDARY_COLOR = '#888';
 
 @Injectable()
